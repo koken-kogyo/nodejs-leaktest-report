@@ -1,0 +1,457 @@
+<!-- es-index.ejs -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>[洩れ検査] 作業日報</title>
+    <link rel="stylesheet" href="/static/css/style-basic.css">
+    <link rel="stylesheet" href="/static/css/style-espages.css">
+    <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
+    <!-- Common JavaScript -->
+    <script src="/static/javascripts/qrcode.js"></script>
+    <script src="/static/javascripts/JsBarcode.all.min.js"></script>
+    <script src="/static/javascripts/_myfunctions.js"></script>
+</head>
+<body>
+    <!-- Common JavaScript EJS -->
+    <%- include("_myfunctions.ejs") %>
+
+    <!-- Header -->
+    <%- include("_header.ejs", { title: "検査作業日報" + myFunc.c(planday), req }) %>
+
+    <!-- Groups -->
+    <div id="navigate">
+    <div id="groups"  class="containers">
+    <% if (locals.err) { %>
+        <ul><li><a href="jp.co.cimtops.ireporter://open">
+        <img src="/static/images/i-reporter.png"></a></li></ul>
+    <% } else { %>
+        <ul id="navi-index">
+            <% let osType = myRequestHeader.osType(req); %>
+            <% let myDtY = new Date(planday)-1; %>
+            <% let idxY = ymds.findIndex((dt) => { return dt === planday }); %>
+
+            <!-- 前日ボタン -->
+            <% if (idxY===0) { %>
+                <li><a href="javascript:alert('これ以上移動できません')" class="noallow"><i class="fas fa-step-backward"></i></a></li>
+            <% } else { %>
+                <li><a href="javascript:prevday()" class="allow"><i class="fas fa-step-backward"></i></a>
+                <input type="hidden" id="prevday" name="prevday" value="<%= myFunc.b(ymds[idxY-1]) %>"></li>
+            <% }; %>
+
+            <!-- i-Reporter ボタン -->
+            <li><a href="javascript:iReporter()"><img src="/static/images/i-reporter.png"></a></li>
+            <!-- li><a href="/es/selector/<%= planday; %>/<%= odcd; %>"><img src="/static/images/i-reporter.png"></a></li -->
+
+            <!-- 品番検索 ボタン -->
+            <li><a href="/essearch" target="_blank"><img src="/static/images/search.png"></a></li>
+
+            <!-- 工程コード選択 -->
+            <li>
+                <select name="select-odcd" title="作業場所の選択" class="select-odcd">
+                    <option value="60707" <%= odcd==="60707" ? "selected":""; %>>炉中洩検(1階)</option>
+                    <option value="60708" <%= odcd==="60708" ? "selected":""; %>>炉中洩検(2階)</option>
+                    <option value="60500" <%= odcd==="60500" ? "selected":""; %>>黄銅洩検</option>
+                    <option value="60717" <%= odcd==="60717" ? "selected":""; %>>炉中メッキ他(1階)</option>
+                    <option value="60718" <%= odcd==="60718" ? "selected":""; %>>炉中メッキ他(2階)</option>
+                    <option value="60727" <%= odcd==="60727" ? "selected":""; %>>炉中目視(1階)</option>
+                    <option value="60728" <%= odcd==="60728" ? "selected":""; %>>炉中目視(2階)</option>
+                </select>
+            </li>
+
+            <!-- 予備空白調整用li ＆ 生産管理用グループ選択 -->
+            <li>
+                <% if (osType == "windows") { %>
+                    <select name="select-odgcd" title="処理グループの選択" class="select-odcd">
+                        <option value="6000">グループ選択</option>
+                        <option value="6070" <%= odcd==="6070" ? "selected":""; %>>炉中洩検</option>
+                        <option value="6050" <%= odcd==="6050" ? "selected":""; %>>黄銅洩検</option>
+                        <option value="6071" <%= odcd==="6071" ? "selected":""; %>>炉中メッキ他</option>
+                        <option value="6072" <%= odcd==="6072" ? "selected":""; %>>炉中目視</option>
+                    </select>
+                <% }; %>
+            </li>
+
+            <!-- OSで処理切り替える -->
+            <!-- 　Windowsは「CSVボタン」 (ejs側で対象データ0件の時はDisableボタン、それ以外はEnableボタン)-->
+            <!-- 　Windows以外は「廃棄処理用 i-Reporter ボタン」 -->
+            <li>
+                <% if (kd8220.length > 0) { %>
+                    <% if (osType == "windows") { %>
+                        <% if (kd8220csv.length > 0) { %>
+                            <a id="csvref" href="javascript:csvdownload(<%= odcd %>)"><img id="csvimg" src="/static/images/csvdownload.png"></a>
+                        <% } else { %>
+                            <img id="csvimg" src="/static/images/csvnothing.png">
+                        <% }; %>
+                    <% } else { %>
+                        <a href="javascript:emergency()"><img class="e1" src="/static/images/i-reporter_e___.png"></a>
+                    <% }; %>
+                <% }; %>
+            </li>
+
+            <!-- QRコード ポッポアップボタン -->
+            <li>
+                <% if (kd8220.length > 0) { %>
+                    <a href="javascript:QRDisp()"><img src="/static/images/qrcode.png"></a>
+                <% }; %>
+            </li>
+
+            <!-- 後日ボタン -->
+            <% let myDtT = new Date(planday)+1; %>
+            <% let idxT = ymds.findIndex((dt) => { return dt === planday }); %>
+            <% if (idxT===(ymds.length-1)) { %>
+                <li><a href="javascript:alert('これ以上移動できません')" class="noallow"><i class="fas fa-step-forward"></i></a></li>
+            <% } else { %>
+                <li><a href="javascript:nextday()" class="allow"><i class="fas fa-step-forward"></a></i>
+                <input type="hidden" id="nextday" name="nextday" value="<%= myFunc.b(ymds[idxT+1]) %>"></li>
+            <% }; %>
+        </ul>
+        <input type="hidden" id="planday" name="planday" value="<%= planday; %>">
+        <input type="hidden" id="disp" name="disp" value="<%= disp %>">
+        <% }; %>
+    </div>
+    <hr>
+    </div>
+
+    <!-- Details -->
+    <div id="top"></div>
+
+    <!-- Popup Window -->
+    <div id="popWin">
+        <div class="pop-win">
+            <div class="modal-body">
+                <div id="qrcode"></div>
+                <svg id="barcode"></svg>
+            </div>
+            <div id="close">閉じる</div>
+        </div>
+    </div>
+
+    <div id="details">
+    <div id="details-index">
+    <% if (locals.err) { %>
+        <ul class="alert">
+            <li><%= err %></li>
+        </ul>
+    <% } else { %>
+
+
+    <% if (kd8220.length == 0) { %>
+        <div class="alert">日報データが存在しません．</div>
+    <% } else { %>
+        <table id="tbl1">
+            <tr>
+                <th width="10px" rowspan="2">
+                    <div class="c-btn"><a href="/es/plan/<%= planday %>/<%= odcd %>/<%= disp=='1' ? '2' : '1' %>">No</a></div>
+                </th>
+                <th width="62px" rowspan="2">得意先</th>
+                <th width="200px" rowspan="2">
+                    <div class="c-btn"><a href="/es/plan/<%= planday %>/<%= odcd %>/<%= disp=='3' ? '4' : '3' %>">　　　品　　番　　　</a></div>
+                </th>
+                <th width="50px" rowspan="2">入庫数</th>
+                <th width="50px" rowspan="2">出庫数</th>
+                <th colspan="4" class="th-small">洩れ不良件数</th>
+                <th width="36px" rowspan="2" class="th-small">形状<br>不良</th>
+                <th width="36px" rowspan="2" class="th-large-small">その他<br>不良</th>
+                <th width="50px" rowspan="2" class="th-small">廃棄数</th>
+                <th width="60px" rowspan="2" class="th-small">
+                    <div class="c-btn"><a href="/es/plan/<%= planday %>/<%= odcd %>/<%= disp=='5' ? '6' : '5' %>">作業者</a></div>
+                </th>
+                <th width="40px" rowspan="2" class="th-small">CSV</th><th width="20px" rowspan="2" class="th-small"></th>
+                <th width="110px" rowspan="2" class="lef">&nbsp;備考</th>
+            </tr>
+            <tr>
+                <th width="36px" height="26px" class="th-large-small">黄銅部</th>
+                <th width="36px" height="26px" class="th-large-small">仮付部</th>
+                <th width="36px" height="26px" class="th-large-small">炉中部</th>
+                <th width="36px" height="26px" class="th-large-small">電気部</th>
+                
+            </tr>
+            <% let myNo = 1; %>
+            <% kd8220.forEach(function (d) { %>
+            <tr>
+                <td ondblclick=<%- `"deleteAutoNo(${d.AUTONO})"` %>><%= myNo %></td>
+                <td class="">&nbsp;<%= myFunc.i(d.TKRNM) %></td>
+                <td class="s<%= d.ENTRYSTS %>">
+                    <a href="javascript:statusupdate(<%= d.AUTONO %>, <%= d.ENTRYSTS %>)" class="td-href" id="no<%= d.AUTONO %>"><%- myFunc.j(d.HMCD) %></a>
+                </td>
+                <td class="td-big"><%= d.CHKQTY %></td><td class="td-big"><%= d.DEPOQTY %></td>
+                <td class="td-small"><%= d.LEAKBRASS==0 ? "" : d.LEAKBRASS %></td>
+                <td class="td-small"><%= d.LEAKTIG==0 ? "" : d.LEAKTIG %></td>
+                <td class="td-small"><%= d.LEAKCOPPER==0 ? "" : d.LEAKCOPPER %></td>
+                <td class="td-small"><%= d.LEAKARC==0 ? "" : d.LEAKARC %></td>
+                <td class="td-small"><%= d.DEFECTSHAPE==0 ? "" : d.DEFECTSHAPE %></td>
+                <td class="td-small"><%= d.DEFECTOTHER==0 ? "" : d.DEFECTOTHER %></td>
+                <% let scrap = d.SCRAPBRASS+d.SCRAPTIG+d.SCRAPCOPPER+d.SCRAPARC+d.SCRAPSHAPE+d.SCRAPOTHER %>
+                <% if (scrap == 0) { %>
+                    <td></td>
+                <% } else { %>
+                    <td class="alert"><%= scrap %></td>
+                <% }; %>
+                <td class="td-large-small"><%= myFunc.k(d.OPNAME) %></td>
+                <td class=""><%= d.CSVOUTDT ? '済' : ' '; %></td>
+                <td class=""><input class="checks" type="checkbox" name="recsv"></td>
+                <td class="lef"><%= d.NOTE %></td>
+                <td style="display: none;"><%= d.AUTONO %></td>
+                <td style="display: none;"><%= d.OPERATOR %></td>
+                <td style="display: none;"><%= d.HMCD %></td>
+            </tr>
+            <% myNo++; %>
+            <% }); %>
+        </table>
+        <br><br>
+    <% }; %>
+
+    <% }; %>
+    </div>
+    </div>
+    <div id="scroll-bottom"></div>
+
+    <!-- Footer -->
+    <%- include("_footer.ejs", req) %>
+
+    <!-- ブラウザ読み込み完了後のJavaScriptを記述 -->
+    <script>
+        // Windows端末 以外は最終行を最初に表示
+        if (myOS() != "windows") {
+            let target = document.getElementById('scroll-bottom');
+            target.scrollIntoView(false);
+        }
+        // 工程場所 selector の change イベント作成
+        const select = document.querySelector('[name="select-odcd"]');
+        select.onchange = event => { 
+            const planday = document.getElementById("planday").value;
+            const odcd = select.value;
+            const disp = document.getElementById("disp").value;
+            location.replace(`/es/plan/${planday}/${odcd}/${disp}`);
+        }
+        // 工程グループ selector の change イベント作成
+        const selectG = document.querySelector('[name="select-odgcd"]');
+        selectG.onchange = event => { 
+            const planday = document.getElementById("planday").value;
+            const odcd = selectG.value; // 4桁で入ってくる
+            const disp = document.getElementById("disp").value;
+            location.replace(`/es/plan/${planday}/${odcd}/${disp}`);
+        }
+        function scriptTest(){
+            var userAgent = window.navigator.userAgent.toLowerCase(); 
+            alert(userAgent);
+        }
+        // 前日処理
+        function prevday(){
+            const prevday = document.getElementById("prevday").value;
+            const odcd = document.querySelector('[name="select-odcd"]').value;
+            const disp = document.getElementById("disp").value;
+            location.href = `/es/plan/${prevday}/${odcd}/${disp}`;
+        }
+        // 翌日処理
+        function nextday(){
+            const nextday = document.getElementById("nextday").value;
+            const odcd = document.querySelector('[name="select-odcd"]').value;
+            const disp = document.getElementById("disp").value;
+            location.href = `/es/plan/${nextday}/${odcd}/${disp}`;
+        }
+        // i-Reporter の起動
+        async function iReporter(){
+            const odcd = document.querySelector('[name="select-odcd"]').value;
+            // 起動時パラメータ ⇒ [クラスター名(要URLエンコード)]=[入力値]を & で繋ぐ
+            // URLエンコード:手配先コード ⇒ %E6%89%8B%E9%85%8D%E5%85%88%E3%82%B3%E3%83%BC%E3%83%89
+            // 簡単なテスト例）location.href = `jp.co.cimtops.ireporter.createreport:defid=350&%E5%85%A5%E5%BA%AB%E6%95%B0=100`;
+            // オンコーディングの理由：ブラウザからiRepo単一選択クラスターを選択させる方法がvalueでは出来ず表示文字列なら可能だった
+            let defid = 0;
+            let odcdparm = "";
+            // defid=350:炉中洩れ検査日報 (テスト運用時は476)
+            // defid=500:黄銅洩れ検査日報
+            // defid=499:炉中出口検査日報
+            if (odcd==="60707") { defid=476; odcdparm = encodeURI("ODCD=炉中洩検(1階)"); }
+            if (odcd==="60708") { defid=476; odcdparm = encodeURI("ODCD=炉中洩検(2階)"); }
+            if (odcd==="60500") { defid=500; odcdparm = encodeURI("ODCD=黄銅洩検"); }
+            if (odcd==="60717") { defid=499; odcdparm = encodeURI("ODCD=炉中目視(1階)"); }
+            if (odcd==="60718") { defid=499; odcdparm = encodeURI("ODCD=炉中目視(2階)"); }
+            if (odcd==="60727") { defid=499; odcdparm = encodeURI("ODCD=炉中目視(1階)"); }
+            if (odcd==="60728") { defid=499; odcdparm = encodeURI("ODCD=炉中目視(2階)"); }
+            if (defid == 0) {
+                location.href = "jp.co.cimtops.ireporter://open";
+            } else {
+                location.href = `jp.co.cimtops.ireporter.createreport:defid=${defid}&${odcdparm}`;
+            }
+            const sleepByPromise = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+            await sleepByPromise(2000);
+            window.close();
+            if (!window.closed) {
+                location.href = "/";
+                console.log("ブラウザの履歴が残っているので自動では閉じることが出来ません！\nxボタンを押して閉じて下さい．");
+            }
+        }
+        // i-Reporter (350:炉中洩れ検査日報) の廃棄処理版の起動
+        function emergency(){
+            // (1) チェックボックスの選択数チェック
+            const el = document.getElementsByClassName("checks");
+            let count = 0;
+            let row = 0;
+            for (let i = 0; i < el.length; i++) {
+                if (el[i].checked) {
+                    row = i + 2;
+                    count++;
+                }
+            }
+            if (count == 0) {
+                alert("廃棄する明細を選択してください");
+                return;
+            }
+            if (count != 1) {
+                alert("選択は1つにしてください");
+                return;
+            }
+            if (window.confirm("廃棄入力を行いますか？") == false) return;
+            // (2) 選択Noの取得とURLパラメータセット
+            const odcd = document.querySelector('[name="select-odcd"]').value;
+            const odgcd = odcd.substring(0, 4) + "0";
+            let defid = "";
+            let odcdparm = "";
+            if (odcd==="60707") { defid=476; odcdparm = encodeURI("ODCD=炉中洩検(1階)"); }
+            if (odcd==="60708") { defid=476; odcdparm = encodeURI("ODCD=炉中洩検(2階)"); }
+            if (odcd==="60500") { defid=500; odcdparm = encodeURI("ODCD=黄銅洩検"); }
+            if (odcd==="60717") { defid=499; odcdparm = encodeURI("ODCD=炉中目視(1階)"); }
+            if (odcd==="60718") { defid=499; odcdparm = encodeURI("ODCD=炉中目視(2階)"); }
+            if (odcd==="60727") { defid=499; odcdparm = encodeURI("ODCD=炉中目視(1階)"); }
+            if (odcd==="60728") { defid=499; odcdparm = encodeURI("ODCD=炉中目視(2階)"); }
+
+            let hmcdparm = encodeURI("スキャン品番=" + tbl1.rows[row].cells[2].innerText.trim());
+            let chkqtyparm = encodeURI("入庫数=0");
+            let depoqtyparm = encodeURI("生産数=0");
+            let operatorparm = encodeURI("入力社員コード=" + tbl1.rows[row].cells[17].innerText);
+            let noteparm = encodeURI("その他情報=廃棄処理依頼");
+            let emergencyparm = "EMERGENCY=1";
+
+            location.href = `jp.co.cimtops.ireporter.createreport:defid=${defid}&${odcdparm}&${hmcdparm}&${chkqtyparm}&${depoqtyparm}&${operatorparm}&${noteparm}&${emergencyparm}`;
+
+            el[row - 2].checked = false;
+        }
+        // リストの消込処理
+        function statusupdate(autono, entrysts) {
+            if (entrysts == "4"){
+                if (window.confirm("消込を元に戻しますか？") == false) return;
+            }
+            // (1) XMLHttpRequestオブジェクトを作成
+            const xmlHttpRequest = new XMLHttpRequest();
+            // (2) ステータス更新依頼
+            const sts = entrysts == "3" ? "4" : "3";
+            xmlHttpRequest.open('GET', `/es/marking/${autono}/${sts}`, false); // 第3引数false:同期通信
+            xmlHttpRequest.send();
+            // (3) 同期処理終了後、ステータス判定
+            if (xmlHttpRequest.readyState == 4 && xmlHttpRequest.status == 200 ) {
+                // (4) ステータスクラス名をDOM更新
+                const row = tbl1.rows.length;
+                for( var i = 2; i < row; i++ ){
+                    if (tbl1.rows[i].cells[16].innerHTML == autono) {
+                        tbl1.rows[i].cells[2].className = `s${sts}`;
+                        break;
+                    }
+                }
+                document.getElementById(`no${autono}`).href = `javascript:statusupdate(${autono}, ${sts})`;
+            }
+        }
+        // CSVダウンロード処理
+        function csvdownload(odcd){
+            const planday = document.getElementById("planday").value;
+            const date = new Date();                        //現在時刻を取得
+            const y = date.getFullYear(),                   //西暦年
+                m = ("0" + (date.getMonth() + 1)).slice(-2),//月　
+                d = ("0" + date.getDate()).slice(-2),       //日
+                H = ("0" + date.getHours()).slice(-2),      //時
+                M = ("0" + date.getMinutes()).slice(-2),    //分
+                S = ("0" + date.getSeconds()).slice(-2);    //秒
+            const downloadday = `${y}-${m}-${d}`;
+            const time = `${H}${M}`;
+            /* alert(`${y}/${m}/${d} ${H}:${M}:${S}`); */
+            // (1) XMLHttpRequestオブジェクトを作成
+            const xmlHttpRequest = new XMLHttpRequest();
+            // (2) CSVデータ作成依頼
+            xmlHttpRequest.open('GET', `/es/makecsv/${planday}/${odcd}/${downloadday}/${time}`, false); // 第3引数false:同期通信
+            xmlHttpRequest.send();
+            // (3) 同期処理終了後、ステータス判定
+            if (xmlHttpRequest.readyState == 4 && xmlHttpRequest.status == 200 ) {
+                // (4) CSVダウンロード済みにDOM更新 (1.img画像と2.リンク先)
+                const row = tbl1.rows.length;
+                for( var i = 2; i < row; i++ ){
+                    tbl1.rows[i].cells[13].innerHTML = "済";
+                }
+                const csvimg = document.getElementById("csvimg");
+                csvimg.src = "/static/images/csvnothing.png";
+                const csvref = document.getElementById("csvref");
+                csvref.href = "javascript:void(0)";
+                // (5) 完成したCSVファイルをダウンロード
+                location.href = `/static/downloads/es_${downloadday}_${odcd}_${time}.csv`;
+            }
+        }
+        // 明細の削除処理
+        function deleteAutoNo(autono){
+            const planday = document.getElementById("planday").value;
+            const odcd = document.querySelector('[name="select-odcd"]').value;
+            // EM取り込み済みのチェック
+            for( var i = 2; i < tbl1.rows.length; i++ ){
+                if (tbl1.rows[i].cells[16].innerHTML == autono) {
+                    if (tbl1.rows[i].cells[13].innerHTML == "済") {
+                        alert("EM取り込み済みのため削除できません．\nシステム担当者に連絡してください．");
+                        return;
+                    };
+                    let msg = "品番：" + tbl1.rows[i].cells[18].innerHTML + "\n" + 
+                        "入庫数：" + tbl1.rows[i].cells[3].innerHTML + "\n" + 
+                        "出庫数：" + tbl1.rows[i].cells[4].innerHTML;
+                    if (window.confirm("本当に削除しますか？\n\n" + msg) == false) return;
+                    break;
+                }
+            }
+            // 削除処理
+            location.href = `/es/delete/${planday}/${odcd}/${autono}`;
+        }
+        // QRポップアップ表示
+        function QRDisp(){
+            // (1) チェックボックスの選択数チェック
+            const el = document.getElementsByClassName("checks");
+            let count = 0;
+            let row = 0;
+            for (let i = 0; i < el.length; i++) {
+                if (el[i].checked) {
+                    row = i + 2;
+                    count++;
+                }
+            }
+            if (count == 0) {
+                alert("明細を選択してください");
+                return;
+            }
+            if (count != 1) {
+                alert("選択は1つにしてください");
+                return;
+            }
+            // (2) QRとバーコードを表示
+            const popWin = document.getElementById("popWin");
+            popWin.style.display = "flex";
+            const hmcd = tbl1.rows[row].cells[2].innerText.trim();
+            new QRCode(document.getElementById("qrcode"), {
+            	text: hmcd,
+	            width: 128,
+                height: 128,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+            JsBarcode("#barcode", hmcd, {
+                format: "CODE128",
+                width: 1,
+                height: 40,
+                displayValue: false
+            });
+            // (3) ポップアップ閉じるイベントハンドラー
+            const close = document.getElementById("close");
+            close.addEventListener("click", () => {
+                popWin.style.display = "none";
+                document.getElementById("qrcode").innerHTML = "";
+            });
+        }
+    </script>
+
+</body>
+</html>

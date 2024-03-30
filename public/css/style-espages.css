@@ -1,0 +1,436 @@
+@charset "UTF-8";
+/* =========================================================================== */
+/*  es-style.css : 主にMPページ群で使用する基本的なスタイルシート
+/* =========================================================================== */
+.containers{
+    width: 100%;
+}
+/* =========================================================================== */
+/*  Navigation共通グループ
+/* =========================================================================== */
+#navigate {
+    position: fixed;
+    display: block;
+    background-color: #fff;
+    top: 40px;
+    width: 100%;
+    z-index: 800;
+}
+#groups {
+    width: 980px;
+    margin: 0 auto;
+}
+#groups ul {
+    display: table;
+    padding: 0;
+    width: 100%;
+}
+#groups ul li {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+}
+#groups a li {
+    border-radius: 3px;
+    background-color: black;
+    color: #eee;
+}
+#groups a li:hover {
+    background-color: #ddd;
+}
+#groups img {
+    vertical-align: middle;
+}
+
+/* =========================================================================== */
+/*  Indexゲーション
+/* =========================================================================== */
+#groups #navi-index li:nth-child(1) {
+    width: 50px;
+}
+#groups #navi-index li:nth-child(2) {
+    width: 100px;
+}
+#groups #navi-index li:nth-child(3) {
+    width: 100px;
+}
+#groups #navi-index li:nth-child(4) {
+    width: 260px;
+}
+#groups #navi-index li:nth-child(6) {
+    width: 80px;
+}
+#groups #navi-index li:nth-child(7) {
+    width: 80px;
+}
+#groups #navi-index li:nth-child(8) {
+    width: 80px;
+}
+#groups #navi-index li:nth-last-child(1) {
+    width: 50px;
+}
+#groups .allow {
+    padding: 0.6em;
+    border-radius: 3px;
+    background-color: rgb(40, 40, 40);
+    color: #eee;
+}
+#groups .allow:hover {
+    border-radius: 3px;
+    background-color: rgb(24, 94, 164);
+    /* width: 30px; */
+    color: #eee;
+}
+#groups .noallow {
+    padding: 0.6em;
+    border-radius: 3px;
+    background-color: rgb(164, 164, 164);
+    color: #eee;
+}
+#groups .active {
+    color: rgb(0,51,153,1);
+    background-color: rgb(153,200,255,0.6);
+}
+#groups .select-odcd {
+	width: 230px;
+    padding: 3px 3px 3px 10px;
+	border: 0.1px solid rgba(163, 243, 214, 0.6);
+    border-radius: 0.3em;
+    color:rgb(55, 82, 72);
+    background-color: rgba(163, 243, 214, 0.6);
+    box-shadow: 2px 2px 4px gray;
+    outline: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+}
+#groups .e1 {
+    opacity: 0.7;
+}
+#groups .e2 {
+    opacity: 0.3;
+}
+
+/* =========================================================================== */
+/*  検索ナビゲーション
+/* =========================================================================== */
+#groups #navi-search li:nth-child(1) {
+    width: 13em;
+}
+#groups #navi-search li:nth-child(2) {
+    width: 16em;
+}
+#groups #navi-search li:nth-child(3) {
+    text-align: left;
+    width: 10em;
+}
+#groups #navi-search li:nth-child(5) {
+    width: 110px;
+}
+#groups #navi-search li:nth-last-child(1) {
+    width: 50px;
+}
+#groups #input-hmcd {
+    font-size: 1.2rem;
+    box-sizing: border-box;
+    padding: 0.3em;
+    transition: 0.3s;
+    letter-spacing: 1px;
+    color: gray;
+    border: 1px solid #9aa0aa;
+    border-radius: 3px;
+    width: 160px;
+}
+#groups .ef input[type='text']:focus {
+    border: 1px solid rgba(82, 223, 0, 0.936);
+    outline: none;
+    box-shadow: 0 0 2px 2px rgba(233, 85, 85, 0.8);
+}
+#groups #select-hmcd {
+    padding: 3px 3px 3px 10px;
+	border: 0.1px solid rgba(82, 114, 102, 0.6);
+    border-radius: 0.3em;
+    color:rgb(55, 82, 72);
+    background-color: rgba(163, 243, 214, 0.6);
+    box-shadow: 2px 2px 4px gray;
+    outline: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+}
+#groups #count {
+    color: gray;
+    margin-left: 1em;
+}
+/* =========================================================================== */
+/*  セレクターナビゲーション
+/* =========================================================================== */
+#groups #navi-selector li:nth-child(1) {
+    width: 250px;
+}
+#groups #navi-selector li:nth-child(2) {
+    width: 260px;
+}
+#groups #navi-selector li:nth-last-child(1) {
+    width: 50px;
+}
+/* =========================================================================== */
+/*  明細共通
+/* =========================================================================== */
+#details {
+    width: 980px;
+    margin: auto;
+    padding-top: 140px;
+    z-index: 700;
+}
+#details ul {
+    display: inline-block;
+    text-align: center;
+}
+/* =========================================================================== */
+/*  個別明細 es-index.ejs es-search.els
+/* =========================================================================== */
+#details-index tr {
+    background-color: #FEFEFE;
+}
+#details-index tr:nth-child(even) {
+    background-color: #ECECEC;
+}
+#details-index th {
+    border: solid 0.5px #1414141c;
+    background-color: rgb(225, 238, 253);
+}
+#details-index .th-big {
+    font-size: 1.4rem;
+}
+#details-index .th-small {
+    font-size: 0.8rem;
+}
+#details-index .th-large-small {
+    font-size: 0.6rem;
+}
+#details-index th a {
+    display: inline-block;
+    padding: 14px 7px;
+    color: cadetblue;
+    text-decoration: none;
+}
+#details-index th a:hover {
+    color: rgb(235, 248, 253);
+}
+#details-index .c-btn {
+    background-color: rgb(225, 238, 253);
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+}
+#details-index .c-btn::after {
+    background-color: rgb(84, 155, 236);
+    border-radius: 3px;
+    position:absolute;
+    top:0;
+    left:0;
+    content:'';
+    width:100%;
+    height: 100%;
+    transform: scale(0, 1);
+    transform-origin: left top;
+    transition: .2s cubic-bezier(0.45, 0, 0.55, 1);
+    z-index: -1;
+}
+#details-index .c-btn:hover {
+    color: #fff;
+}
+#details-index .c-btn:hover::after {
+    transform: scale(1, 1);
+}
+#details-index td {
+    text-align: center;
+    border: solid 0.5px #1414141c;
+    padding: 2px 0px ;
+    vertical-align: middle;
+    height: 36px;
+}
+#details-index .td-href {
+    color:rgb(0, 0, 0);
+    text-decoration: none;
+    font-weight: bold;
+    padding: 8px 0px;
+}
+#details-index .td-big {
+    font-weight: bold;
+}
+#details-index .td-small {
+    font-size: 0.8rem;
+}
+#details-index .td-large-small {
+    font-size: 0.7rem;
+}
+#details-index .lef {
+    text-align: left;
+}
+#details-index .s3 {
+    text-align: left;
+}
+#details-index .s4 {
+    text-align: left;
+    border-radius: 3px;
+    background-color: rgba(255, 105, 180, 0.3);
+}
+#details-index .s8 {
+    text-align: left;
+    border-radius: 3px;
+    background-color: rgba(250, 240, 20, 0.5);
+}
+/* =========================================================================== */
+/*  selector明細
+/* =========================================================================== */
+#details-selector {
+    display: grid;
+    padding: 0px 60px;
+    grid-template-rows: 300px;
+    grid-template-columns: 45% 10% 45%;
+}
+#details-selector .item {
+    text-align: center;
+    padding: 30px 30px;
+    border-radius: 60px;
+    background-color: rgba(255, 150, 0, 1.0);
+    box-shadow: 4px 4px 8px gray;
+    color: #eee;
+}
+#details-selector .item:hover {
+    background-color: rgba(255, 150, 0, 0.5);
+    color: rgb(50, 50, 50, 0.5);
+}
+#details-selector a {
+    text-align: center;
+    text-decoration: none;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+#details-selector img {
+    padding: 30px 0px 0px 0px;
+}
+#details-selector p {
+    margin: 15px 0px 0px 0px;
+}
+/* =========================================================================== */
+/*  i-Phone
+/* =========================================================================== */
+#details-i {
+    z-index: 700;
+}
+#details-i #tbl2 {
+    margin: auto;
+    font-size: 3.6rem;
+    width: 98%;
+}
+#details-i tr {
+    background-color: #FEFEFE;
+}
+#details-i tr:nth-child(even) {
+    background-color: #ECECEC;
+}
+#details-i th {
+    border: solid 0.5px #1414141c;
+    background-color: rgb(225, 238, 253);
+}
+#details-i #tbl2 .th-big {
+    font-size: 2.4rem;
+}
+#details-i #tbl2 .th-small {
+    font-size: 1.4rem;
+}
+#details-i td {
+    text-align: center;
+    border: solid 0.5px #1414141c;
+    padding: 2px 0px ;
+    vertical-align: middle;
+    height: 36px;
+}
+#details-i #tbl2 .td-big {
+    font-weight: normal;
+    font-size: 2.2rem;
+}
+#details-i #tbl2 .td-small {
+    font-size: 1.4rem;
+}
+#details-i #tbl2 .td-large-small {
+    font-size: 1.1rem;
+}
+#details-i .s3 {
+    font-size: 50px;
+    text-align: left;
+}
+#details-i .s4 {
+    font-size: 50px;
+    text-align: left;
+    border-radius: 3px;
+    background-color: rgba(255, 105, 180, 0.3);
+}
+/* =========================================================================== */
+/*  ポップアップウィンドウ
+/* =========================================================================== */
+#popup {
+    text-align: center;
+    font-weight: bold;
+    display: block;
+    width: 100px;
+    padding: 10px;
+    border: solid;
+    border-radius: 8px;
+    margin: 0 auto;
+    cursor: pointer;
+}
+#popWin {
+position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0,0,0,.5);
+    z-index: 2;
+}
+.pop-win {
+    border-radius: 5px;
+    width: 280px;
+    height: 200px;
+    background-color: #fff;
+}
+.modal-body {
+    display: grid;
+    margin: 10px 0px;
+}
+.modal-body img { 
+    margin: 0 auto; 
+}
+#barcode { 
+    margin: 0 auto; 
+}#close {
+    color: #fff;
+    cursor: pointer;
+    text-align: center;
+    vertical-align: bottom;
+}
+/* =========================================================================== */
+/*  ワーニング
+/* =========================================================================== */
+.nodata {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+    text-align: center;
+    width: 865px;
+    margin: 0 auto;
+}
+.alert {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+    text-align: center;
+    font-weight: bold;
+}
