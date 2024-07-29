@@ -270,7 +270,9 @@ exports.insertKD8220 = async (id, args, bads, scraps, others) => {
     const scraparc = Number(scraps.split(":")[3]);
     const scrapshape = Number(scraps.split(":")[4]);
     const scrapother = Number(scraps.split(":")[5]);
-    const entrykbn = others.split(":")[1]; // 1:QR品番 2:三枚複写 3:試作品番
+    const repair = others.split(":")[1] == '' ? null : others.split(":")[1];
+    const verifire = others.split(":")[2] == '' ? null : others.split(":")[2];
+    const entrykbn = others.split(":")[3]; // 1:QR品番 2:三枚複写 3:試作品番
     let note = "";
     if (entrykbn == "3") {
         note = "試作" + others.split(":")[0];
@@ -283,18 +285,18 @@ exports.insertKD8220 = async (id, args, bads, scraps, others) => {
             "CHKQTY, DEPOQTY, DEPTCD, OPERATOR, " + 
             "LEAKBRASS, LEAKTIG, LEAKCOPPER, LEAKARC, DEFECTSHAPE, DEFECTOTHER, "+ 
             "SCRAPBRASS, SCRAPTIG, SCRAPCOPPER, SCRAPARC, SCRAPSHAPE, SCRAPOTHER, " + 
-            "NOTE, INSTID, UPDTID" + 
+            "NOTE, REPAIR, VERIFIRE, INSTID, UPDTID" + 
         ") select curdate(), ?, ?, b.TKCD, ?, " + 
             "?, ?, a.DEPTCD, ?, " + 
             "?, ?, ?, ?, ?, ?, " + 
             "?, ?, ?, ?, ?, ?, " + 
-            "?, ?, ? " + 
+            "?, ?, ?, ?, ? " + 
         "from km0010 a left outer join m0500 b on b.HMCD=? where a.EMPNO=?" 
         , [ entrykbn, odcd, hmcd, 
             chkqty, depoqty, operator, 
             leakbrass, leaktig, leakcopper, leakarc, defectshape, defectother, 
             scrapbrass, scraptig, scrapcopper, scraparc, scrapshape, scrapother, 
-            note, id, id, hmcd, operator ]
+            note, repair, verifire, id, id, hmcd, operator ]
     );
 };
 
@@ -361,8 +363,13 @@ exports.getKD8220 = async (date, odcd, disp) => {
             break;                         
     }
     const kd8220 = await getDatabase(
-        "select a.*, ifnull(b.TKRNM, '-') as 'TKRNM', NAME as 'OPNAME' " + 
-        "from kd8220 a left outer join m0200 b on a.TKCD=b.TKCD, km0010 c " +
+        "select a.*, ifnull(b.TKRNM, '-') as 'TKRNM', c.NAME as 'OPNAME' " + 
+        ", ifnull(r.NAME, '') as 'RNAME'" + 
+        ", ifnull(v.NAME, '') as 'VNAME'" + 
+        "from kd8220 a " +
+        "left outer join m0200  b on a.TKCD=b.TKCD " + 
+        "left outer join km0010 r on a.REPAIR=r.EMPNO " +
+        "left outer join km0010 v on a.VERIFIRE=v.EMPNO, km0010 c " +
         "where a.OPERATOR=c.EMPNO and ENTRYDT=? and ODCD like ? " + orderby
         , [date, odcdlike]
     );

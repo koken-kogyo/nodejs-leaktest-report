@@ -60,6 +60,9 @@ app.get("/directerror/:userid", (req, res) => {
 // API実績計上なしエラーテスト
 // http://192.168.96.189:3000/ireporegist/md/60708:RC691-62133:4:4:11014/::::::/::::::/実績なし品番61301:
 // http://192.168.96.189:3000/ireporegist/md/60708:17960-83H50-000:10:10:11014/::::::/::::::/実績あり品番61301:
+// API登録テスト
+// https://pc090n:53010/ireporegist/md/60797:129486-59120:200:198:11014/::::2::/::::1::/修正不可:10898:11178:2:
+// https://pc090n:53010/ireporegist/md/60797:129486-59120:200:198:11014/::::2::/::::1::/修正不可:::1:
 
 // API登録テスト
 // https://192.168.3.197:53010/ireporegist/bw/60798:RA168-63223:10:8:11014/0:0:0:0:0:2:/0:0:0:0:0:1:/:2:
@@ -79,7 +82,7 @@ app.get("/ireporegist/:id/:args/:bads/:scraps/:others", async function (req, res
         const others = req.params.others;
         const hmcd = args.split(":")[1];
         const operator = args.split(":")[4];
-        const entrykbn = others.split(":")[1]; // 1:QR品番 2:三枚複写 3:試作品番
+        const entrykbn = others.split(":")[3]; // 1:QR品番 2:三枚複写 3:試作品番
         const d = new Date();
         const planday = d.getFullYear() + "-" + 
             ("0" + (d.getMonth() + 1)).slice(-2) + "-" + 
