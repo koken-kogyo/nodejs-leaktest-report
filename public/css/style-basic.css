@@ -6,6 +6,8 @@
 body {
     font-family: "Arial", "メイリオ", sans-serif;
     position: relative;
+    width: 100vw;
+    height: 100vh;
     display: block;
     margin: 0;
     padding: 0;
@@ -21,18 +23,43 @@ header {
     position: fixed;
     display: block;
     color: rgb(255,255,255);
-    font-size: 24px;
+    font-size: x-large;
     top: 0;
     width: 100%;
     height: 40px;
-/*    background: rgb(50, 50, 50, 1); */
-    background: rgb(175, 25 ,25, 1);
+    background: rgb(50, 50, 50, 1);
+/*    background: rgb(175, 25 ,25, 1); */
     z-index: 999;
+}
+#logo a {
+    position: relative;
+    top: 5px;
+    left: 1rem;
+    color: rgb(255,255,255);
+    text-decoration: none;
+}
+#menutitle {
+    position: fixed;
+    top: 3px;
+    left: calc((100vw / 2) - 5em);
+}
+#userinfo {
+    display: inline-block;
+    position: fixed;
+    font-size: 1rem;
+    top: 5px;
+    right: 30px;
+}
+#userinfo a,#gotop a,#goback a {
+    display: inline-block;
+    text-align: right;
+    margin-top: 5px;
+    color: cadetblue;
+    text-decoration: none;
 }
 
 footer {
     position: fixed;
-    display: block;
     font-size: 0.8rem;
     bottom: 0;
     width: 100%;
@@ -50,36 +77,21 @@ footer>p {
     padding: 4px 2px 2px 2px;
     margin: 0;
 }
+/* === [Copy Right] === */
+footer .copyright {
+    position: fixed;
+    padding: 3px 0 0 0;
+    left: calc((100vw / 2) - 120px);
+}
+/* === [responsible] === */
+footer .responsible {
+    position: fixed; /* 要素の位置：絶対*/
+    bottom: 2px;
+    right: 160px;
+    color: rgb(255, 255, 255, 0.2);
+}
 
 /************************************************************************/
-#logo a {
-    display: inline-block;
-    position: relative;
-    white-space: nowrap;
-    top: 5px;
-    left: 1rem;
-    color: rgb(255,255,255);
-    text-decoration: none;
-}
-#menutitle {
-    position: fixed;
-    top: 3px;
-    left: calc(100vw / 2 - 3em);
-}
-#userinfo {
-    display: inline-block;
-    position: fixed;
-    font-size: 1rem;
-    top: 5px;
-    right: 30px;
-}
-#userinfo a,#gotop a,#goback a {
-    display: inline-block;
-    text-align: right;
-    margin-top: 5px;
-    color: cadetblue;
-    text-decoration: none;
-}
 #gotop {
     display: block;
     position: fixed;

@@ -20,6 +20,7 @@
     width: 980px;
     margin: 0 auto;
 }
+.responsible:before { content: "TabletFix980px"; }
 #groups ul {
     display: table;
     padding: 0;
@@ -40,6 +41,10 @@
 }
 #groups img {
     vertical-align: middle;
+}
+@media screen and (min-height: 900px) and (max-height: 1199px) and (orientation: portrait) {
+    .responsible:before { content: "TabletPortrait"; }
+    #groups {width: 100%;}
 }
 
 /* =========================================================================== */
@@ -184,6 +189,9 @@
 #details ul {
     display: inline-block;
     text-align: center;
+}
+@media screen and (min-height: 900px) and (max-height: 1199px) and (orientation: portrait) {
+    #details {width: 100%;}
 }
 /* =========================================================================== */
 /*  個別明細 es-index.ejs es-search.els
