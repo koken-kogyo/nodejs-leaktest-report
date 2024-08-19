@@ -190,7 +190,7 @@
                 <% } else { %>
                     <td class="alert"><%= scrap %></td>
                 <% }; %>
-                <td class="td-large-small"><%= myFunc.k(d.OPNAME) %><%- d.VNAME=='' ? '' : '<br>' + d.VNAME %></td>
+                <td class="td-large-small"><%= myFunc.k(d.OPNAME) %><%- d.RNAME=='' ? '' : '<br>' + d.RNAME %><%- d.VNAME=='' ? '' : '<br>' + d.VNAME %></td>
                 <td class=""><%= d.CSVOUTDT ? '済' : ' '; %></td>
                 <td class=""><input class="checks" type="checkbox" name="recsv"></td>
                 <td class="lef"><%= d.NOTE %></td>

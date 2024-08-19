@@ -80,7 +80,7 @@ app.get("/ireporegist/:id/:args/:bads/:scraps/:others", async function (req, res
         const bads = req.params.bads;
         const scraps = req.params.scraps;
         const others = req.params.others;
-        const hmcd = args.split(":")[1];
+        const hmcd = args.split(":")[1].replace('−','-'); // 24.08.19 mod y.w U+2212(MINUS SIGN) 変換←ハンドスキャナーで読み取るとおかしなコードになる
         const operator = args.split(":")[4];
         const entrykbn = others.split(":")[3]; // 1:QR品番 2:三枚複写 3:試作品番
         const d = new Date();
