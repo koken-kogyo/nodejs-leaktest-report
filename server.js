@@ -123,8 +123,13 @@ app.get("/ireporegist/:id/:args/:bads/:scraps/:others", async function (req, res
         let ktflg = "";
         let jiflg = false;
         let newargs = "";
-        if(args.substring(0, 4) == "6050"){
-            ktflg = await mysqlHandler.isM0510KTCD(hmcd,  "WL01");
+        if(args.substring(0, 4) == "6050") {
+            //ktflg = await mysqlHandler.isM0510KTCD(hmcd,  "WL01"); // 24.08.19 mod y.w 黄銅洩検の工程チェック方法を変更（仮付け、ベンダー、建機からの洩れ検査も担当する為）
+            if (await mysqlHandler.isM0510KTCD(hmcd,  "WL04")) {
+                ktflg = false;  // 黄銅と炉中を間違えた場合はエラー
+            } else {
+                ktflg = true;   // それ以外はチェックなしでスルー
+            }
             jiflg = await mysqlHandler.isM0510JIKBN(hmcd, "ES00");
             newargs = args; // 黄銅洩れ検査（実績なし）
         } else if (args.substring(0, 4) == "6070") {
