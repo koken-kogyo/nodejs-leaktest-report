@@ -60,10 +60,14 @@ app.get("/directerror/:userid", (req, res) => {
 // API実績計上なしエラーテスト
 // http://192.168.96.189:3000/ireporegist/md/60708:RC691-62133:4:4:11014/::::::/::::::/実績なし品番61301:
 // http://192.168.96.189:3000/ireporegist/md/60708:17960-83H50-000:10:10:11014/::::::/::::::/実績あり品番61301:
-// API登録テスト
+// API登録テスト(テスト環境)
 // https://pc090n:53010/ireporegist/md/60797:129486-59120:200:198:11014/::::2::/::::1::/修正不可:10898:11178:2:
 // https://pc090n:53010/ireporegist/md/60797:129486-59120:200:198:11014/::::2::/::::1::/修正不可:::1:
+// https://pc090n:53010/ireporegist/bw/60500:32B35-06301:100:100:20804/::::::/::::::/:::1:
+// https://pc090n:53010/ireporegist/md/60717:RA231-62131-B:38:38:20804/::::::/::::::/:::1:
 
+// API登録テスト(本番環境)
+// https://koken:53010/ireporegist/BW/60500:3B291-82732-S:1:1:11040/::::::/::::::/手もれ:::1:
 // API登録テスト
 // https://192.168.3.197:53010/ireporegist/bw/60798:RA168-63223:10:8:11014/0:0:0:0:0:2:/0:0:0:0:0:1:/:2:
 // https://192.168.3.197:53010/ireporegist/md/60707:129486-59120:200:198:11014/::::2::/::::1::/修正不可:1:
@@ -122,6 +126,7 @@ app.get("/ireporegist/:id/:args/:bads/:scraps/:others", async function (req, res
         // 通常品番の登録処理
         let ktflg = "";
         let jiflg = false;
+        let es01jiflg = false;
         let newargs = "";
         if(args.substring(0, 4) == "6050") {
             //ktflg = await mysqlHandler.isM0510KTCD(hmcd,  "WL01"); // 24.08.19 mod y.w 黄銅洩検の工程チェック方法を変更（仮付け、ベンダー、建機からの洩れ検査も担当する為）
@@ -133,14 +138,22 @@ app.get("/ireporegist/:id/:args/:bads/:scraps/:others", async function (req, res
             jiflg = await mysqlHandler.isM0510JIKBN(hmcd, "ES00");
             newargs = args; // 黄銅洩れ検査（実績なし）
         } else if (args.substring(0, 4) == "6070") {
-            ktflg = await mysqlHandler.isM0510KTCD(hmcd,  "WL04");
+            // ktflg = await mysqlHandler.isM0510KTCD(hmcd,  "WL04"); // 24.08.20 mod y.w 炉中洩検の工程チェック方法を変更（社外ブレージングWLZ406からの洩れ検査に対応）
+            if (await mysqlHandler.isM0510KTCD(hmcd,  "WL01")) {
+                ktflg = false;  // 黄銅と炉中を間違えた場合はエラー
+            } else {
+                ktflg = true;   // それ以外はチェックなしでスルー
+            }
             jiflg = await mysqlHandler.isM0510JIKBN(hmcd, "ES00");
             newargs = args; // 炉中洩れ検査（実績あり）
         } else if (args.substring(0, 4) == "6079") {
             ktflg = await mysqlHandler.isM0510KTCD(hmcd,  "WL04");
             jiflg = await mysqlHandler.isM0510JIKBN(hmcd, "WL04");
+            es01jiflg = await mysqlHandler.isM0510JIKBN(hmcd, "ES01");
             if (jiflg == true) {
                 newargs = "6071" + args.substring(4); // 目視検査⇒メッキ他 に自動振り分け（実績あり）
+            } else if (es01jiflg == true) {
+                newargs = "6071" + args.substring(4); // 形状検査・修正工程⇒メッキ他 に自動振り分け（実績あり）
             } else {
                 newargs = "6072" + args.substring(4); // 目視検査⇒洩れ検査行き に自動振り分け（実績なし）
             }
@@ -195,7 +208,8 @@ app.get("/ireporegist/:id/:args/:bads/:scraps/:others", async function (req, res
             return res.render("index.ejs", {req, planday, err: 
                 `[${hmcd}] 工程コードと入力場所が不一致です．品番を確認の上Xボタンを押してください．`});
         // 実績計上あり工程の判定
-        } else if ((odcd.substring(0, 4) == "6070" || odcd.substring(0, 4) == "6071") && jiflg != true) {
+        } else if ((odcd.substring(0, 4) == "6070" || 
+                    odcd.substring(0, 4) == "6071" && jiflg != true && es01jiflg != true)) {
             const logger = log4js.getLogger("e");
             logger.error("実績計上が不要な品番です:" + hmcd);
             logger.error(`/ireporegist/${userid}/${args}/${bads}/${scraps}/${others}`);

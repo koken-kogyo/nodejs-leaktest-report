@@ -539,9 +539,9 @@ exports.isM0510JIKBN = async (hmcd, ktcd) => {
 
 // 入力場所の工程コードチェック
 exports.isM0510KTCD = async (hmcd, ktcd) => {
-    const ktcdlike = ktcd + "%";
-    const sql = "select * from m0510 a where a.HMCD=? and a.KTCD like ? and a.VALDTF=" +
+    // const ktcdlike = ktcd + "%";
+    const sql = "select * from m0510 a where a.HMCD=? and a.KTCD=? and a.VALDTF=" +
         "(select MAX(tmp.VALDTF) from M0510 tmp where tmp.HMCD=a.HMCD)";
-    const m0510 = await getDatabase(sql, [hmcd, ktcdlike]);
+    const m0510 = await getDatabase(sql, [hmcd, ktcd]);
     return m0510.length == 0 ? false : true;
 };
