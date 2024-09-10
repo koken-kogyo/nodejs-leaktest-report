@@ -83,7 +83,7 @@ app.get("/ireporegist/:id/:args/:bads/:scraps/:others", async function (req, res
         const args = req.params.args;
         const bads = req.params.bads;
         const scraps = req.params.scraps;
-        const others = req.params.others;
+        let others = req.params.others;
         const hmcd = args.split(":")[1].replace('−','-'); // 24.08.19 mod y.w U+2212(MINUS SIGN) 変換←ハンドスキャナーで読み取るとおかしなコードになる
         const operator = args.split(":")[4];
         const entrykbn = others.split(":")[3]; // 1:QR品番 2:三枚複写 3:試作品番
@@ -154,6 +154,14 @@ app.get("/ireporegist/:id/:args/:bads/:scraps/:others", async function (req, res
                 newargs = "6071" + args.substring(4); // 目視検査⇒メッキ他 に自動振り分け（実績あり）
             } else if (es01jiflg == true) {
                 newargs = "6071" + args.substring(4); // 形状検査・修正工程⇒メッキ他 に自動振り分け（実績あり）
+                // 備考の形状検査を自動付与（帳票に作ったチェックボックスは要らなかったなぁ）
+                if (others.indexOf("形状検査") == -1) {
+                    if (others.split(":")[0] == "") {
+                        others = "形状検査" + others;
+                    } else {
+                        others = "形状検査," + others;
+                    }
+                }
             } else {
                 newargs = "6072" + args.substring(4); // 目視検査⇒洩れ検査行き に自動振り分け（実績なし）
             }
@@ -208,8 +216,8 @@ app.get("/ireporegist/:id/:args/:bads/:scraps/:others", async function (req, res
             return res.render("index.ejs", {req, planday, err: 
                 `[${hmcd}] 工程コードと入力場所が不一致です．品番を確認の上Xボタンを押してください．`});
         // 実績計上あり工程の判定
-        } else if ((odcd.substring(0, 4) == "6070" || 
-                    odcd.substring(0, 4) == "6071" && jiflg != true && es01jiflg != true)) {
+        } else if ((odcd.substring(0, 4) == "6070" && jiflg == false) || 
+                   (odcd.substring(0, 4) == "6071" && jiflg == false && es01jiflg == false)) {
             const logger = log4js.getLogger("e");
             logger.error("実績計上が不要な品番です:" + hmcd);
             logger.error(`/ireporegist/${userid}/${args}/${bads}/${scraps}/${others}`);
@@ -220,7 +228,8 @@ app.get("/ireporegist/:id/:args/:bads/:scraps/:others", async function (req, res
             return res.render("index.ejs", {req, planday, err: 
                 `[${hmcd}] 間違った品番が入力されました [実績計上が不要な品番]．品番を確認の上ブラウザを閉じてください．`});
         // 実績計上なし工程の判定
-        } else if ((odcd.substring(0, 4) == "6050" || odcd.substring(0, 4) == "6072") && jiflg != false) {
+        } else if ((odcd.substring(0, 4) == "6050" && jiflg == true) || 
+                   (odcd.substring(0, 4) == "6072" && jiflg == true)) {
             const logger = log4js.getLogger("e");
             logger.error("実績計上が必要な品番です:" + hmcd);
             logger.error(`/ireporegist/${userid}/${args}/${bads}/${scraps}/${others}`);

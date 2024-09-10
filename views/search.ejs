@@ -3,7 +3,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>データ検索</title>
+    <title>日報データ検索</title>
     <link rel="stylesheet" href="/static/css/style-basic.css">
     <link rel="stylesheet" href="/static/css/style-espages.css">
     <!-- レスポンシブwebデザインの指定 --><!-- デバイスの横幅合わせ,等倍表示（半角空白入れるな！） -->
@@ -18,7 +18,7 @@
     <%- include("_myfunctions.ejs") %>
 
     <!-- Header -->
-    <%- include("_header.ejs", { title: "検査日報 データ検索", req }) %>
+    <%- include("_header.ejs", { title: "日報データ検索", req }) %>
 
     <!-- Groups -->
     <div id="navigate">
@@ -29,14 +29,15 @@
             <!-- 入力ボックス -->
             <li>
                 <label class="ef">
-                    <input type="text" maxlength="12" placeholder="品番を入力" oninput="inputChange()" id="input-hmcd"></li>
+                    <input type="text" maxlength="14" placeholder="品番を入力" oninput="inputChange()" id="input-hmcd"></li>
                 </label>
             <!-- 検索ボタン -->
             <li>
                 <select name="select-hmcd" title="品番の選択" id="select-hmcd" disabled>
                     <option>品番を入力してください</option>
                 </select>
-                <select name="list-hmcd" title="品番の選択" id="list-hmcd" hidden>
+                <!-- 過去に登録された全品番リストを Hidden で置いておき、後ほど検索で使用 -->
+                <select name="all-hmcd" title="品番の選択" id="all-hmcd" hidden >
                     <% kd8220dic.forEach(function (d) { %>
                         <option value="<%= d.HMCD %>"><%= d.HMCD %></option>
                     <% }); %>
@@ -80,8 +81,8 @@
     <% } else { %>
         <table id="tbl1">
             <tr>
-                <th width="40px" rowspan="2">No</th>
-                <th width="200px" rowspan="2">　　　品　　番　　　</th>
+                <th width="80px" rowspan="2">工程</th>
+                <th width="200px" rowspan="2">品　　番</th>
                 <th width="50px" rowspan="2">入庫数</th>
                 <th width="50px" rowspan="2">出庫数</th>
                 <th colspan="4" class="th-small">洩れ不良件数</th>
@@ -110,39 +111,46 @@
 
     <!-- ブラウザ読み込み完了後のJavaScriptを記述 -->
     <script>
+        // 初期フォーカスをセット
+        document.getElementById("input-hmcd").focus();
+
+        // 入力された品番にマッチするセレクトボックスを作成
         function inputChange(){
-            //list-hmcd から select-hmcd を生成
-            const inputHMCD = document.getElementById("input-hmcd"); 
-            const srch = inputHMCD.value.toUpperCase();
-            const srchlen = srch.length;
-            const listHMCD = document.getElementById("list-hmcd");
+            const HMCD = document.getElementById("input-hmcd").value.toUpperCase();
+            const allHMCD = document.getElementById("all-hmcd");
             const selectHMCD = document.getElementById("select-hmcd");
-            selectHMCD.disabled = false; //選択可能な状態にする
-            selectHMCD.innerHTML = "";
-            //alert("clear");
-            //alert("table delete");
-            //選択されたジャンルのメニュー一覧に対して処理をする
-            for (let i = 0; i < listHMCD.length; i++) {
-                let target = listHMCD[i].value;
-                if (target.substr(0, srchlen) == srch) {
-                    if (selectHMCD.length == 0){
-                        const option = document.createElement("option");
-                        option.innerHTML = "品番を選択してください";
-                        selectHMCD.appendChild(option);
-                    }
-                    const option = document.createElement("option");
-                    option.value = listHMCD[i].value;
-                    option.innerHTML = listHMCD[i].value;
-                    selectHMCD.appendChild(option);
-                }
-            };
-            if (selectHMCD.length == 0) {
-                const option = document.createElement('option');
+
+            document.getElementById("input-hmcd").value = HMCD; // 入力品番を小文字から大文字変換したものに置き換える
+
+            selectHMCD.disabled = false;    // 選択可能な状態にする
+            selectHMCD.innerHTML = "";      // 内容を一旦クリア
+
+            //all-hmcd から select-hmcd を生成（ハイフンを除去して検索）
+            const newArray = Array.from(allHMCD.options).filter(option => option.value.replace("-","").indexOf(HMCD.replace("-","")) != -1);
+
+            if (newArray.length == 0) {
+                const option = document.createElement("option");
                 option.innerHTML = "品番を入力してください";
                 selectHMCD.appendChild(option);
                 selectHMCD.disabled = true;
                 document.getElementById("count").innerHTML = "対象なし";
+            } else if (newArray.length == 1) {
+                const option = document.createElement("option");
+                option.value = newArray[0].value;
+                option.innerHTML = newArray[0].value;
+                selectHMCD.appendChild(option);
+                document.getElementById("count").innerHTML = "1件Hit";
+                changeHMCD(newArray[0].value);
             } else {
+                const option = document.createElement("option");
+                option.innerHTML = "品番を選択してください";
+                selectHMCD.appendChild(option);
+                for (let i = 0; i < newArray.length; i++) {
+                    const option = document.createElement("option");
+                    option.value = newArray[i].value;
+                    option.innerHTML = newArray[i].value;
+                    selectHMCD.appendChild(option);
+                };
                 // 工程場所 selector の change イベント作成
                 const select = document.querySelector('[name="select-hmcd"]');
                 select.onchange = event => { 
@@ -165,7 +173,7 @@
                 // APIで取得したデータをテーブ行に追加
                 data.forEach(function (d) {
                     let newRow = table.insertRow();
-                    appendTD(newRow, d.AUTONO, "");
+                    appendTD(newRow, getEntryRNM(d.ODCD), "");
                     appendTD(newRow, d.HMCD, "s" + d.ENTRYSTS);
                     appendTD(newRow, d.CHKQTY, "td-big");
                     appendTD(newRow, d.DEPOQTY, "td-big");

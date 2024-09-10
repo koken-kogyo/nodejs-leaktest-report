@@ -17,3 +17,33 @@ function myBrowser() {
     if (browser.match("ie") !== null) { return "ie"; } else 
     if (browser.match("opera") !== null) { return "opera"; } else { return ""; }
 }
+// 入力場所コード（odcd）の名前を返却
+function getEntryName(odcd) {
+    if (odcd == "60707") return "炉中洩検(1階)";
+    if (odcd == "60708") return "炉中洩検(2階)";
+    if (odcd == "60500") return "黄銅洩検";
+    if (odcd == "60717") return "炉中メッキ他(1階)";
+    if (odcd == "60718") return "炉中メッキ他(2階)";
+    if (odcd == "60727") return "炉中目視(1階)";
+    if (odcd == "60728") return "炉中目視(2階)";
+    if (odcd == "6070") return "炉中洩検";
+    if (odcd == "6050") return "黄銅洩検";
+    if (odcd == "6071") return "炉中メッキ他";
+    if (odcd == "6072") return "炉中目視";
+    return "-";
+}
+// 入力場所コード（odcd）の略称を返却
+function getEntryRNM(odcd) {
+    if (odcd == "60707") return "炉洩1F";
+    if (odcd == "60708") return "炉洩2F";
+    if (odcd == "60500") return "黄銅洩";
+    if (odcd == "60717") return "ﾒｯｷ他1F";
+    if (odcd == "60718") return "ﾒｯｷ他2F";
+    if (odcd == "60727") return "目視1F";
+    if (odcd == "60728") return "目視2F";
+    if (odcd == "6070") return "炉中洩";
+    if (odcd == "6050") return "黄銅洩";
+    if (odcd == "6071") return "ﾒｯｷ他";
+    if (odcd == "6072") return "目視";
+    return "-";
+}

@@ -119,14 +119,14 @@
 /*  検索ナビゲーション
 /* =========================================================================== */
 #groups #navi-search li:nth-child(1) {
-    width: 13em;
+    width: 15rem;
 }
 #groups #navi-search li:nth-child(2) {
-    width: 16em;
+    width: 18rem;
 }
 #groups #navi-search li:nth-child(3) {
     text-align: left;
-    width: 10em;
+    width: 10rem;
 }
 #groups #navi-search li:nth-child(5) {
     width: 110px;
@@ -137,13 +137,13 @@
 #groups #input-hmcd {
     font-size: 1.2rem;
     box-sizing: border-box;
-    padding: 0.3em;
+    padding: 0.3rem;
     transition: 0.3s;
     letter-spacing: 1px;
     color: gray;
     border: 1px solid #9aa0aa;
     border-radius: 3px;
-    width: 160px;
+    width: 12rem;
 }
 #groups .ef input[type='text']:focus {
     border: 1px solid rgba(82, 223, 0, 0.936);

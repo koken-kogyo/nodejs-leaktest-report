@@ -456,13 +456,14 @@ exports.getKD8220dic = async () => {
     return kd8220dic;
 };
 
-// 炉中洩れ検査日報検索APIデータ取得
+// 炉中洩れ検査日報検索APIデータ取得(並び替え後100件まで)
 exports.getKD8220hmcd = async (hmcd) => {
     const kd8220hmcd = await getDatabase(
         "select a.*, ifnull(b.TKRNM, '-') as 'TKRNM', NAME as 'OPNAME' " + 
         "from kd8220 a left outer join m0200 b on a.TKCD=b.TKCD, km0010 c " +
         "where a.OPERATOR=c.EMPNO and a.HMCD=? " + 
-        "order by a.AUTONO desc"
+        "order by a.AUTONO desc " + 
+        "limit 100"
         , [hmcd]
     );
     return kd8220hmcd;
