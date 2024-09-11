@@ -77,6 +77,10 @@ app.get("/directerror/:userid", (req, res) => {
 // APIエラーテスト
 // http://192.168.3.197:3000/ireporegist/md/60707:1294xx-59xxx:200:198:11014/::::2::/::::1::/修正不可:1:
 // http://192.168.3.197:3000/ireporegist/md/60707:129486-59120:200:198:xx014/::::2::/::::1::/修正不可:1:
+// 形状検査テスト
+// https://192.168.3.197:53010/ireporegist/md/60797:6C222-38204:6:6:11014/::::::/::::::/:::1:
+// https://192.168.3.197:53010/ireporegist/md/60707:6C222-38204:6:6:11014/::::::/::::::/:::1:
+// https://192.168.3.197:53010/ireporegist/md/60797:6C222-38204:6:6:11014/::::::/::::::/形状検査:::1:
 app.get("/ireporegist/:id/:args/:bads/:scraps/:others", async function (req, res, next) {
     try {
         const userid = req.params.id.toUpperCase();
@@ -149,22 +153,28 @@ app.get("/ireporegist/:id/:args/:bads/:scraps/:others", async function (req, res
         } else if (args.substring(0, 4) == "6079") {
             ktflg = await mysqlHandler.isM0510KTCD(hmcd,  "WL04");
             jiflg = await mysqlHandler.isM0510JIKBN(hmcd, "WL04");
-            es01jiflg = await mysqlHandler.isM0510JIKBN(hmcd, "ES01");
-            if (jiflg == true) {
-                newargs = "6071" + args.substring(4); // 目視検査⇒メッキ他 に自動振り分け（実績あり）
-            } else if (es01jiflg == true) {
-                newargs = "6071" + args.substring(4); // 形状検査・修正工程⇒メッキ他 に自動振り分け（実績あり）
-                // 備考の形状検査を自動付与（帳票に作ったチェックボックスは要らなかったなぁ）
-                if (others.indexOf("形状検査") == -1) {
-                    if (others.split(":")[0] == "") {
-                        others = "形状検査" + others;
-                    } else {
-                        others = "形状検査," + others;
-                    }
+
+            // 形状検査実績あり工程の場合、特殊処理を行う(2024-09-11時点で7件)
+            if (await mysqlHandler.isM0510JIKBN(hmcd, "ES01")) {
+                // iRepoで形状検査にチェックされていたら実績ありに変換
+                if (others.indexOf("形状検査") != -1) {
+                    es01jiflg = true;
+                    others = others.replace("形状検査", "形状検査済"); 
                 }
+                // [6C222-38204] は WL04実績なし:炉目視 ⇒ ES00実績あり:炉洩れ ⇒ ES01実績あり:炉形状 の 3件がKD8220に登録される
             } else {
-                newargs = "6072" + args.substring(4); // 目視検査⇒洩れ検査行き に自動振り分け（実績なし）
+                // 形状検査実績あり工程以外なのに、iRepoで計上検査をチェックしていた場合、備考から消去（つまり無視）
+                others = others.replace("形状検査", "");
             }
+
+            if (jiflg == true) {
+                newargs = "6071" + args.substring(4); // WL04実績あり品番の場合⇒メッキ他 に振り分け
+            } else if (es01jiflg == true) {
+                newargs = "6071" + args.substring(4); // 形状検査実績ありの場合⇒メッキ他 に振り分け
+            } else {
+                newargs = "6072" + args.substring(4); // WL04実績なし品番の場合⇒洩れ行き に振り分け
+            }
+
         } else {
             const logger = log4js.getLogger("e");
             logger.error("手配先コードが確認出来ません:" + args.substring(0, 5));
