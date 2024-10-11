@@ -336,10 +336,10 @@ app.get("/es/makecsv/:planday/:odcd/:downloadday/:time", async function (req, re
     const csvfilename = `es_${downloadday}_${odcd}_${time}.csv`;
     const csvfilepath = `${__dirname}/public/downloads/${csvfilename}`;
     try {
-        const kd8220csv = await mysqlHandler.getKD8220csv(planday, odcd);
-        csvwrite(kd8220csv, csvfilepath); // サーバー上にCSVファイル作成
         const userid = req.session.userid;
+        const kd8220csv = await mysqlHandler.getKD8220csv(planday, odcd);
         await mysqlHandler.updateKD8220downloaded(userid, planday, odcd);
+        csvwrite(kd8220csv, csvfilepath); // サーバー上にCSVファイル作成
         res.status(200).end();
     } catch (err) {
         next(err);

@@ -355,7 +355,7 @@
             }
         }
         // CSVダウンロード処理
-        function csvdownload(odcd){
+        async function csvdownload(odcd) {
             const planday = document.getElementById("planday").value;
             const date = new Date();                        //現在時刻を取得
             const y = date.getFullYear(),                   //西暦年
@@ -376,7 +376,11 @@
             if (xmlHttpRequest.readyState == 4 && xmlHttpRequest.status == 200 ) {
                 // (4) CSVダウンロード済みにDOM更新 (1.img画像と2.リンク先)
                 const row = tbl1.rows.length;
-                for( var i = 2; i < row; i++ ){
+
+                // 0.5秒後にダウンロードが始まるよう forループにwaitを入れて工夫
+                const _sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+                for( var i = 2; i < row; i++ ) {
+                    await _sleep(500 / row);
                     tbl1.rows[i].cells[13].innerHTML = "済";
                 }
                 const csvimg = document.getElementById("csvimg");
