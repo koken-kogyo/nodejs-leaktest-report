@@ -65,6 +65,8 @@ app.get("/directerror/:userid", (req, res) => {
 // https://pc090n:53010/ireporegist/md/60797:129486-59120:200:198:11014/::::2::/::::1::/修正不可:::1:
 // https://pc090n:53010/ireporegist/bw/60500:32B35-06301:100:100:20804/::::::/::::::/:::1:
 // https://pc090n:53010/ireporegist/md/60717:RA231-62131-B:38:38:20804/::::::/::::::/:::1:
+// https://pc090n:53010/ireporegist/BW/60708:69250GL10A-8:7:7:11040/::::::/::::::/専用治具:::1:
+// https://pc090n:53010/ireporegist/BW/60708:69250GL10A-8:7:7:11040/::::::/::::::/:::1:
 
 // API登録テスト(本番環境)
 // https://koken:53010/ireporegist/BW/60500:3B291-82732-S:1:1:11040/::::::/::::::/手もれ:::1:
@@ -149,6 +151,12 @@ app.get("/ireporegist/:id/:args/:bads/:scraps/:others", async function (req, res
                 ktflg = true;   // それ以外はチェックなしでスルー
             }
             jiflg = await mysqlHandler.isM0510JIKBN(hmcd, "ES00");
+            // 「69250GL10A-8」特例措置 2024.10.28
+            if (hmcd == "69250GL10A-8") {
+                ktflg = true;   // スルー
+                jiflg = true;   // スルー
+                others = (others.split(":")[0] != "") ? "実績計上なし," + others: "実績計上なし" + others; 
+            }
             newargs = args; // 炉中洩れ検査（実績あり）
         } else if (args.substring(0, 4) == "6079") {
             ktflg = await mysqlHandler.isM0510KTCD(hmcd,  "WL04");
