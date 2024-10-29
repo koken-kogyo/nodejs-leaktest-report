@@ -6,6 +6,7 @@
     <title>日報データ検索</title>
     <link rel="stylesheet" href="/static/css/style-basic.css">
     <link rel="stylesheet" href="/static/css/style-espages.css">
+    <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
     <!-- レスポンシブwebデザインの指定 --><!-- デバイスの横幅合わせ,等倍表示（半角空白入れるな！） -->
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <!-- Common JavaScript -->
@@ -45,14 +46,14 @@
             </li>
             <!-- 件数表示 -->
             <li><div color="#333" id="count"></div></li>
-            <!-- 予備空白調整用 -->
-            <li></li>
             <!-- QRコード ポッポアップボタン -->
             <li>
                 <a href="javascript:QRDisp()"><img src="/static/images/qrcode.png"></a>
             </li>
+            <!-- 再検索ボタン (予備空白調整用だった) -->
+            <li><a href="javascript:researchHMCD();"><i class="fas fa-search webbtn"></i></a></li>
             <!-- 閉じるボタン -->
-            <li><a href="javascript:open('about:blank', '_self').close();"><img src="/static/images/xmark-solid.svg" width="50px"></a></li>
+            <li><a href="javascript:open('about:blank', '_self').close();"><i class="far fa-window-close webbtn"></i></a></li>
         </ul>
     </div>
     <hr>
@@ -114,9 +115,22 @@
         // 初期フォーカスをセット
         document.getElementById("input-hmcd").focus();
 
+        // IME全角入力の未確定状態かそれ以外かを判定
+        let isComposing = false;
+        window.addEventListener("compositionstart", e => {isComposing = true;});
+        window.addEventListener("compositionend", e => {
+            isComposing = false;
+            inputChange();
+        });
+        
         // 入力された品番にマッチするセレクトボックスを作成
         function inputChange(){
-            const HMCD = document.getElementById("input-hmcd").value.toUpperCase();
+            if (isComposing) return; // 全角入力中は処理を行わない
+            // 全角英数字を半角に変換
+            let str = document.getElementById("input-hmcd").value.toUpperCase().replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(s) {
+                return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+            });
+            const HMCD = str;
             const allHMCD = document.getElementById("all-hmcd");
             const selectHMCD = document.getElementById("select-hmcd");
 
@@ -143,6 +157,7 @@
                 changeHMCD(newArray[0].value);
             } else {
                 const option = document.createElement("option");
+                option.value = "";
                 option.innerHTML = "品番を選択してください";
                 selectHMCD.appendChild(option);
                 for (let i = 0; i < newArray.length; i++) {
@@ -207,6 +222,17 @@
             let newText = document.createTextNode(str);
             newCell.appendChild(newText);
             if (name!="") {newCell.className = name;}
+        }
+        // 再検索
+        function researchHMCD() {
+            const inputhmcd = document.getElementById("input-hmcd").value;
+            const selecthmcd = document.getElementById("select-hmcd").value;
+            if (inputhmcd == "") {alert("品番を入力してください．"); return;}
+            if (selecthmcd != "") {
+                changeHMCD(selecthmcd);
+            } else {
+                alert("品番を選択してください.");
+            }
         }
         // CSVダウンロード処理
         function csvdownload(){

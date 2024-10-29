@@ -114,6 +114,15 @@
 #groups .e2 {
     opacity: 0.3;
 }
+#groups .webbtn {
+    padding: 0.6em;
+    border-radius: 3px;
+    background-color: rgb(40, 40, 40);
+    color: #eee;
+}
+#groups .webbtn:hover {
+    background-color: rgb(24, 94, 164);
+}
 
 /* =========================================================================== */
 /*  検索ナビゲーション
