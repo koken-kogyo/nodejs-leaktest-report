@@ -1,4 +1,4 @@
-<!-- es-index.ejs -->
+<!-- index.ejs -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -242,14 +242,26 @@
         // 前日処理
         function prevday(){
             const prevday = document.getElementById("prevday").value;
-            const odcd = document.querySelector('[name="select-odcd"]').value;
+            let odcd = "";
+            odcd = document.querySelector('[name="select-odcd"]').value;
+            if (document.querySelector('[name="select-odgcd"]') != null) {
+                if (document.querySelector('[name="select-odgcd"]').value != "6000") {
+                    odcd = document.querySelector('[name="select-odgcd"]').value;
+                }
+            }
             const disp = document.getElementById("disp").value;
             location.href = `/es/plan/${prevday}/${odcd}/${disp}`;
         }
         // 翌日処理
         function nextday(){
             const nextday = document.getElementById("nextday").value;
-            const odcd = document.querySelector('[name="select-odcd"]').value;
+            let odcd = "";
+            odcd = document.querySelector('[name="select-odcd"]').value;
+            if (document.querySelector('[name="select-odgcd"]') != null) {
+                if (document.querySelector('[name="select-odgcd"]').value != "6000") {
+                    odcd = document.querySelector('[name="select-odgcd"]').value;
+                }
+            }
             const disp = document.getElementById("disp").value;
             location.href = `/es/plan/${nextday}/${odcd}/${disp}`;
         }
