@@ -73,6 +73,8 @@ app.get("/directerror/:userid", (req, res) => {
 // 炉中と黄銅が混ざる工程のテスト 25.08.12
 // https://192.168.3.197:53010/ireporegist/md/60707:126677-39650-3:20:20:11014/::::::/::::::/仮付＞炉中＞洩検＞黄銅でも登録できること:::1:
 // https://192.168.3.197:53010/ireporegist/md/60707:126677-39670-3:30:30:11014/::::::/::::::/仮付＞炉中＞洩検＞黄銅でも登録できること:::1:
+// https://192.168.3.197:53010/ireporegist/md/60500:126677-39650-3:20:20:11014/::::::/::::::/仮付＞炉中＞洩検＞黄銅でも登録できること:::1:
+// https://192.168.3.197:53010/ireporegist/md/60500:126677-39670-3:30:30:11014/::::::/::::::/仮付＞炉中＞洩検＞黄銅でも登録できること:::1:
 // https://192.168.3.197:53010/ireporegist/BW/60707:TC650-56321:17:17:11014/::::::/::::::/黄銅品番エラーになること:::1:
 // https://192.168.3.197:53010/ireporegist/MD/60708:129G01-39600:20:20:11014/::::::/::::::/登録できなくなって困った品番１:::1:
 // https://192.168.3.197:53010/ireporegist/MD/60708:RD829-45811:6:6:11014/::::::/::::::/登録できなくて困った品番２:::1:
@@ -139,19 +141,23 @@ app.get("/ireporegist/:id/:args/:bads/:scraps/:others", async function (req, res
         let jiflg = false;
         let es01jiflg = false;
         let newargs = "";
+        const ktflgWL01 = await mysqlHandler.isM0510KTCD(hmcd,  "WL01"); // 2025.08.12
+        const ktflgWL04 = await mysqlHandler.isM0510KTCD(hmcd,  "WL04"); // 2025.08.12
         if(args.substring(0, 4) == "6050") {
             //ktflg = await mysqlHandler.isM0510KTCD(hmcd,  "WL01"); // 24.08.19 mod y.w 黄銅洩検の工程チェック方法を変更（仮付け、ベンダー、建機からの洩れ検査も担当する為）
-            if (await mysqlHandler.isM0510KTCD(hmcd,  "WL04")) {
+            if (ktflgWL01 == false && ktflgWL04 == true) {
                 ktflg = false;  // 黄銅と炉中を間違えた場合はエラー
             } else {
                 ktflg = true;   // それ以外はチェックなしでスルー
             }
-            jiflg = await mysqlHandler.isM0510JIKBN(hmcd, "ES00");
+            if (ktflgWL01 == true && ktflgWL04 == true) {
+                jiflg = false; // 2025.08.12 炉中黄銅あり品番対応
+            } else {
+                jiflg = await mysqlHandler.isM0510JIKBN(hmcd, "ES00");
+            }
             newargs = args; // 黄銅洩れ検査（実績なし）
         } else if (args.substring(0, 4) == "6070") {
             // ktflg = await mysqlHandler.isM0510KTCD(hmcd,  "WL04"); // 24.08.20 mod y.w 炉中洩検の工程チェック方法を変更（社外ブレージングWLZ406からの洩れ検査に対応）
-            const ktflgWL01 = await mysqlHandler.isM0510KTCD(hmcd,  "WL01"); // 25.08.12
-            const ktflgWL04 = await mysqlHandler.isM0510KTCD(hmcd,  "WL04"); // 25.08.12
             if (ktflgWL01 == true && ktflgWL04 == false) {
                 ktflg = false;  // 黄銅と炉中を間違えた場合はエラー
             } else {
@@ -421,6 +427,11 @@ app.get("/es/search/:hmcd", async function (req, res, next) {
     } catch (err) {
         next(err);
     }
+});
+
+// 仕様書
+app.get("/specification", (req, res) => {
+    res.render("specification.ejs")
 });
 
 // 包括的エラーハンドリング

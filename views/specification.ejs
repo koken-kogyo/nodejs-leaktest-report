@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>取り扱い説明書</title>
+    <link rel="stylesheet" href="/static/css/style-basic.css">
+    <link rel="stylesheet" href="/static/css/monokai-sublime.min.css">
+    <script src="/static/javascripts/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <!-- link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai-sublime.min.css" -->
+    <!-- script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script -->
+
+    <style>
+        body{
+            background-color: rgba(200, 200, 200, 0.1);
+            margin-top: 50px;
+        }
+        #containers {
+            width: 1080px;
+            margin: auto;
+            padding: 10px 40px;
+            background-color: rgba(255, 255, 255, 1.0);
+            border-radius: 5px;
+        }
+        li { margin-left: 50px; }
+        .lef1 { margin-left: 50px; }
+        .lef2 { margin-left: 80px; }
+        .lef3 { margin-left: 110px; }
+        tr { 
+            height: 2.0rem;
+        }
+        th { 
+            text-align: left; 
+            border: solid 0.5px #1414141c;
+            background-color: #00a8a9;
+            color: #FCFCFC;
+            padding: 5px;
+        }
+        td {
+            vertical-align: top;
+            border: solid 0.5px #1414141c;
+            background-color: rgba(200,200,200,0.8);
+            padding: 5px;
+        }
+        .hljs {
+            background: #23241f;
+            color: #f8f8f2;
+            border-radius: 5px;
+            width: 700px;
+            margin-left: 80px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div id="logo"><a href="/">コーケン工業</a></div>
+        <div id="menutitle">システム仕様書</div>
+    </header>
+    <div id="containers">
+        <!-- Details -->
+        <h1>検査日報システム</h1>
+
+        システム概要
+        <li class="">iPadで入力した検査日報を社内システムに登録。(概念図①②)</li>
+        <li class="">洩れ検査の場合は、洩れ検査日報Excelを自動作成。(概念図④)</li>
+        <li class="">実績あり工程の場合は、EMへの実績登録入力支援を行う。(概念図⑤⑥)</li>
+        <br>
+
+        <details>
+            <summary>システム概念図</summary>
+            <img src="/static/images/SystemConcept.png" height="450px" class="lef1" />
+        </details><br>
+
+        <details>
+            <summary>入力場所コードについて</summary>
+            <table class="lef2">
+                <tr>
+                    <th width="50px">コード</th>
+                    <th width="150px">名称</th>
+                    <th width="60px">コード</th>
+                    <th width="180px">名称</th>
+                </tr>
+                <tr><td rowspan="2">6070</td><td rowspan="2">炉中洩検</td><td>60707</td><td>炉中洩検(1階)</td></tr>
+                <tr><td>60708</td><td>炉中洩検(2階)</td></tr>
+                <tr><td>6050</td><td>黄銅洩検</td><td>60500</td><td>黄銅洩検</td></tr>
+                <tr><td rowspan="2">6071</td><td rowspan="2">炉中メッキ他</td><td>60717</td><td>炉中メッキ他(1階)</td></tr>
+                <tr><td>60718</td><td>炉中メッキ他(2階)</td></tr>
+                <tr><td rowspan="2">6072</td><td rowspan="2">炉中目視</td><td>60727</td><td>炉中目視(1階)</td></tr>
+                <tr><td>60728</td><td>炉中目視(2階)</td></tr>
+            </table>
+        </details><br>
+
+        <details>
+            <summary>入力区分 (ENTRYKBN)について</summary>
+            <table class="lef2">
+                <tr>
+                    <th width="50px">コード</th>
+                    <th width="150px">内容</th>
+                    <th width="360px">詳細</th>
+                </tr>
+                <tr><td>1</td><td>QR品番</td><td>QRコードを読み取って品番入力した場合</td></tr>
+                <tr><td>2</td><td>三枚複写</td><td>仮想キーボードを使って品番入力した場合</td></tr>
+                <tr><td>3</td><td>試作品番</td><td>初回・試作の枠に品番入力した場合</td></tr>
+                <tr><td>9</td><td>不明</td><td>品番未入力の場合の初期値</td></tr>
+            </table>
+        </details><br>
+
+        <details>
+            <summary>仕様書</summary>
+            <li>EMへの実績計上について</li><br>
+            <div class="lef2">１．入力区分を判定</div>
+                <div class="lef3">入力区分が"3：試作"の場合、備考欄の先頭に「試作」の文字をプログラム側で挿入</div>
+                <div class="lef3">EMへの実績計上の対象外とする</div><br>
+
+            <div class="lef2">２．入力場所コードから工程コードを算出</div>
+            <pre><code class="language-javascript">
+    Case "60707": KTCD = "ES00"
+    Case "60708": KTCD = "ES00"
+    Case "60500": KTCD = "ES00"
+    Case "60717": KTCD = "WL04"
+    Case "60718": KTCD = "WL04"
+    Case "60727": KTCD = "X60727"   // 実績をあげさせない為の偽文字
+    Case "60728": KTCD = "X60728"   // 実績をあげさせない為の偽文字
+    Case "Else":  KTCD = "XXXXX"    // 実績をあげさせない為のXX文字
+            </code></pre><br>
+
+            <div class="lef2">３．形状検査の場合は工程コードを変換</div>
+	        <div class="lef2">（備考欄（列番号16）に「形状検査」という文字が入っていたら変換）</div>
+            <pre><code class="language-javascript">
+    If InStr(wWs.Cells(wRow, 16).Value, "形状検査") <> 0 Then KTCD = "ES01"
+            </code></pre><br>
+
+            <div class="lef2">４．CSVを1レコードづつSendKeysにてEMに転送</div>
+            <pre><code class="language-javascript">
+    SendKeys "{TAB}" & HMCD & "{TAB}"
+    SendKeys KTCD & "{TAB}"
+    SendKeys "{TAB}" // 手配先コードはEMが自動算出したコードを使用
+    SendKeys "{TAB}" // 初期表示されている実績日を使用
+    SendKeys QTY & "{TAB}"   // 良品数
+    SendKeys SCRAP & "{TAB}" // 廃棄数
+            </code></pre><br>
+
+            <div class="lef2">５．EM画面にて1レコードづつ更新実行(F9)</div><br>
+
+            <br>
+            <li>サーバー側登録チェックについて</li><br>
+            <div class="lef2">１．入力場所と品目手順マスタとの整合性チェック</div>
+                <table class="lef3">
+                    <tr><td rowspan="2">6050　</td><td>黄銅工程[WL01]が無くて炉中工程[WL04]が存在する場合エラー　　</td></tr>
+                    <tr><td>洩検工程[ES00]実績ありが存在する場合エラー</td></tr>
+                    <tr><td rowspan="2">6070</td><td>黄銅工程[WL01]が存在して炉中工程[WL04]が無い場合エラー</td></tr>
+                    <tr><td>洩検工程[ES00]実績ありが存在しない場合エラー</td></tr>
+                </table><br>
+            <div class="lef2">２．作業担当者コードの存在チェック</div>
+                <div class="lef3">km0010従業員マスタに存在しない場合エラー</div><br>
+            <div class="lef2">３．品目マスタの存在チェック</div>
+                <div class="lef3">m0500品目マスタに存在しない場合エラー</div><br>
+            <div class="lef2">４．二重登録チェック</div>
+                <div class="lef3">1分以内に全く同じ登録リクエストが来た場合エラー</div><br>
+        </details><br>
+
+        <details>
+            <summary>注意品番について</summary>
+            <li>社外ブレージング</li>
+            <div class="lef2">浜ブレ[WLZ406]からの洩検[ES00]が実績計上されること</div>
+            <div class="lef2">17560-87J01-000</div><br>
+            <li>形状検査</li>
+            <div class="lef2">洩検[ES00]と形状検査[ES01]で共に実績計上されること</div>
+            <div class="lef2">6C222-38204</div>
+                <div class="lef3">20[WL04]目視1F（実績計上なし）→</div>
+                <div class="lef3">30[ES00]炉洩1F（実績計上あり）→</div>
+                <div class="lef3">40[ES01]ﾒｯｷ他1F（実績計上あり）→備考が形状検査済</div><br>
+            <li>サブコンプ品</li>
+            <div class="lef2">サブコンプ品の洩検[ES00]は実績を上げないこと</div>
+            <div class="lef2">69250GL10A-8</div><br>
+            <li>炉中黄銅混在品番</li>
+            <div class="lef2">洩検[ES00]は実績計上され黄銅[WL01]は実績計上されないこと</div>
+            <div class="lef2">126677-39650-3</div><br>
+        </details><br>
+
+        <details>
+            <summary>画面サンプル</summary>
+            <li>Excelマクロ画面</li>
+            <img src="/static/images/vbamacro.png" height="320px" class="lef2" />
+            <br><br>
+            <li>洩れ検査日報サンプル</li>
+            <img src="/static/images/excelchecksheet.png" height="450px" class="lef2" />
+            <br><br>
+        </details><br>
+
+    </div>
+    <footer>
+        <a class="copyright">&copy; 2023-2025 Koken Kogyo Co. All rights reserved.</a>    
+        <a class="responsible"></a>
+    </footer>
+</body>
+</html>
