@@ -41,9 +41,11 @@ function getEntryRNM(odcd) {
     if (odcd == "60718") return "ﾒｯｷ他2F";
     if (odcd == "60727") return "目視1F";
     if (odcd == "60728") return "目視2F";
+    if (odcd == "60200") return "電気洩";
     if (odcd == "6070") return "炉中洩";
     if (odcd == "6050") return "黄銅洩";
     if (odcd == "6071") return "ﾒｯｷ他";
     if (odcd == "6072") return "目視";
+    if (odcd == "6020") return "電気洩";
     return "-";
 }

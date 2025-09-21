@@ -88,7 +88,11 @@ app.get("/directerror/:userid", (req, res) => {
 // https://192.168.3.197:53010/ireporegist/md/60797:6C222-38204:6:6:11014/::::::/::::::/２形状検査で実績:::1:
 
 // サブコンプ品のテスト（仮＞ブレ＞洩検で実績をあげてはいけない）
-// https://192.168.3.197:53010/ireporegist/BW/60708:69250GL10A-8:7:7:11040/::::::/::::::/サブコンプ品はEMに計上されないこと:::1:
+// https://192.168.3.197:53010/ireporegist/BW/60708:69250GL10A-8:7:7:11014/::::::/::::::/サブコンプ品はEMに計上されないこと:::1:
+
+// 電気溶接のテスト 2025.09.20
+// https://192.168.3.197:53010/ireporegist/MD/60200:RB411-92444:16:16:11014/::::::/::::::/初回登録テスト:::1:
+// https://192.168.3.197:53010/ireporegist/MD/60200:RB411-92444:16:16:11014/:::2:::/:::1:::/修正者と確認者のテスト:10836:10861:2:
 
 app.get("/ireporegist/:id/:args/:bads/:scraps/:others", async function (req, res, next) {
     try {
@@ -143,6 +147,7 @@ app.get("/ireporegist/:id/:args/:bads/:scraps/:others", async function (req, res
         let newargs = "";
         const ktflgWL01 = await mysqlHandler.isM0510KTCD(hmcd,  "WL01"); // 2025.08.12
         const ktflgWL04 = await mysqlHandler.isM0510KTCD(hmcd,  "WL04"); // 2025.08.12
+        const ktflgWL15 = await mysqlHandler.isM0510KTCD(hmcd,  "WL15"); // 2025.09.24
         if(args.substring(0, 4) == "6050") {
             //ktflg = await mysqlHandler.isM0510KTCD(hmcd,  "WL01"); // 24.08.19 mod y.w 黄銅洩検の工程チェック方法を変更（仮付け、ベンダー、建機からの洩れ検査も担当する為）
             if (ktflgWL01 == false && ktflgWL04 == true) {
@@ -156,6 +161,7 @@ app.get("/ireporegist/:id/:args/:bads/:scraps/:others", async function (req, res
                 jiflg = await mysqlHandler.isM0510JIKBN(hmcd, "ES00");
             }
             newargs = args; // 黄銅洩れ検査（実績なし）
+
         } else if (args.substring(0, 4) == "6070") {
             // ktflg = await mysqlHandler.isM0510KTCD(hmcd,  "WL04"); // 24.08.20 mod y.w 炉中洩検の工程チェック方法を変更（社外ブレージングWLZ406からの洩れ検査に対応）
             if (ktflgWL01 == true && ktflgWL04 == false) {
@@ -171,6 +177,7 @@ app.get("/ireporegist/:id/:args/:bads/:scraps/:others", async function (req, res
                 others = (others.split(":")[0] != "") ? "実績計上なし," + others: "実績計上なし" + others; //コメント先頭に「実績計上なし」を書いておくとVBAマクロでEMに飛ばさない
             }
             newargs = args; // 炉中洩れ検査（実績あり）
+
         } else if (args.substring(0, 4) == "6079") {
             ktflg = await mysqlHandler.isM0510KTCD(hmcd,  "WL04");
             jiflg = await mysqlHandler.isM0510JIKBN(hmcd, "WL04");
@@ -195,6 +202,11 @@ app.get("/ireporegist/:id/:args/:bads/:scraps/:others", async function (req, res
             } else {
                 newargs = "6072" + args.substring(4); // WL04実績なし品番の場合⇒洩れ行き に振り分け
             }
+
+        } else if(args.substring(0, 4) == "6020") {
+            ktflg = ktflgWL15;  // WL15工程が無かったらはエラー
+            jiflg = await mysqlHandler.isM0510JIKBN(hmcd, "ES00");
+            newargs = args;
 
         } else {
             const logger = log4js.getLogger("e");
@@ -259,8 +271,11 @@ app.get("/ireporegist/:id/:args/:bads/:scraps/:others", async function (req, res
             return res.render("index.ejs", {req, planday, err: 
                 `[${hmcd}] 間違った品番が入力されました [実績計上が不要な品番]．品番を確認の上ブラウザを閉じてください．`});
         // 実績計上なし工程の判定
-        } else if ((odcd.substring(0, 4) == "6050" && jiflg == true) || 
-                   (odcd.substring(0, 4) == "6072" && jiflg == true)) {
+        } else if (
+                    (odcd.substring(0, 4) == "6050" && jiflg == true) || 
+                    (odcd.substring(0, 4) == "6072" && jiflg == true) || 
+                    (odcd.substring(0, 4) == "6020" && jiflg == true)
+                ) {
             const logger = log4js.getLogger("e");
             logger.error("実績計上が必要な品番です:" + hmcd);
             logger.error(`/ireporegist/${userid}/${args}/${bads}/${scraps}/${others}`);
@@ -423,6 +438,18 @@ app.get("/es/search/:hmcd", async function (req, res, next) {
     try {
         const hmcd = req.params.hmcd;
         const kd8220hmcd = await mysqlHandler.getKD8220hmcd(hmcd);
+        res.status(200).json(kd8220hmcd);
+    } catch (err) {
+        next(err);
+    }
+});
+// 洩れ検査日報データを日付条件指定付きで取得 API
+app.get("/es/search/:hmcd/:stdate/:eddate", async function (req, res, next) {
+    try {
+        const hmcd = req.params.hmcd;
+        const stdate = req.params.stdate;
+        const eddate = req.params.eddate;
+        const kd8220hmcd = await mysqlHandler.getKD8220hmcdinstdt(hmcd, stdate, eddate);
         res.status(200).json(kd8220hmcd);
     } catch (err) {
         next(err);

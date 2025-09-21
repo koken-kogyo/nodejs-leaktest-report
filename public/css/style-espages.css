@@ -127,26 +127,32 @@
 /* =========================================================================== */
 /*  検索ナビゲーション
 /* =========================================================================== */
+/* 品番入力ボックス */
 #groups #navi-search li:nth-child(1) {
-    width: 15rem;
+    text-align: center;
+    width: 200px;
 }
+/* 選択ボックス */
 #groups #navi-search li:nth-child(2) {
-    width: 18rem;
+    width: 220px;
 }
-#groups #navi-search li:nth-child(3) {
+/* 日付選択 */
+#groups #navi-search li:nth-last-child(3) {
     text-align: left;
-    width: 10rem;
+    width: 260px;
 }
-#groups #navi-search li:nth-child(5) {
-    width: 110px;
+/* 検索ボタン */
+#groups #navi-search li:nth-last-child(2) {
+    width: 50px;
 }
+/* QRアイコン */
 #groups #navi-search li:nth-last-child(1) {
     width: 50px;
 }
 #groups #input-hmcd {
-    font-size: 1.2rem;
-    box-sizing: border-box;
+    font-size: 1.1rem;
     padding: 0.3rem;
+    box-sizing: border-box;
     transition: 0.3s;
     letter-spacing: 1px;
     color: gray;
@@ -160,19 +166,29 @@
     box-shadow: 0 0 2px 2px rgba(233, 85, 85, 0.8);
 }
 #groups #select-hmcd {
-    padding: 3px 3px 3px 10px;
+    font-size: 1.1rem;
+    padding: 0.3rem;
 	border: 0.1px solid rgba(82, 114, 102, 0.6);
     border-radius: 0.3em;
     color:rgb(55, 82, 72);
     background-color: rgba(163, 243, 214, 0.6);
     box-shadow: 2px 2px 4px gray;
     outline: none;
-    font-size: 1.4rem;
     cursor: pointer;
+    width: 14rem;
 }
 #groups #count {
     color: gray;
     margin-left: 1em;
+}
+#flatpickrRange {
+    font-size: 1.1rem;
+    padding: 0.3rem 0.5rem;
+    width: 14.5rem;
+}
+.clear-button {
+    background-color: beige;
+    cursor: pointer;
 }
 /* =========================================================================== */
 /*  セレクターナビゲーション
@@ -214,6 +230,14 @@
 #details-index th {
     border: solid 0.5px #1414141c;
     background-color: rgb(225, 238, 253);
+}
+.sticky1 {
+    position: sticky;
+    top: 142px;
+}
+.sticky2 {
+    position: sticky;
+    top: 168px;
 }
 #details-index .th-big {
     font-size: 1.4rem;

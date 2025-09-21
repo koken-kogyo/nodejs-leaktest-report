@@ -6,10 +6,13 @@
     <title>日報データ検索</title>
     <link rel="stylesheet" href="/static/css/style-basic.css">
     <link rel="stylesheet" href="/static/css/style-espages.css">
+    <link rel="stylesheet" href="/static/css/flatpickr.min.css">
     <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
     <!-- レスポンシブwebデザインの指定 --><!-- デバイスの横幅合わせ,等倍表示（半角空白入れるな！） -->
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <!-- Common JavaScript -->
+    <script src="/static/javascripts/flatpickr.min.js"></script>
+    <script src="/static/javascripts/ja.js"></script>
     <script src="/static/javascripts/qrcode.js"></script>
     <script src="/static/javascripts/JsBarcode.all.min.js"></script>
     <script src="/static/javascripts/_myfunctions.js"></script>
@@ -29,13 +32,15 @@
             <% let osType = myRequestHeader.osType(req); %>
             <!-- 入力ボックス -->
             <li>
+                　
                 <label class="ef">
-                    <input type="text" maxlength="14" placeholder="品番を入力" oninput="inputChange()" id="input-hmcd"></li>
+                    <input type="text" maxlength="20" placeholder="品番を入力" oninput="inputChange()" id="input-hmcd"></li>
                 </label>
-            <!-- 検索ボタン -->
+            <!-- 選択ボックス -->
             <li>
+                <div color="#333" id="count">　</div>
                 <select name="select-hmcd" title="品番の選択" id="select-hmcd" disabled>
-                    <option>品番を入力してください</option>
+                    <option value="-1">品番を入力してください</option>
                 </select>
                 <!-- 過去に登録された全品番リストを Hidden で置いておき、後ほど検索で使用 -->
                 <select name="all-hmcd" title="品番の選択" id="all-hmcd" hidden >
@@ -45,15 +50,24 @@
                 </select>
             </li>
             <!-- 件数表示 -->
-            <li><div color="#333" id="count"></div></li>
-            <!-- QRコード ポッポアップボタン -->
+            <li></li>
+            <!-- 日付範囲指定 -->
             <li>
-                <a href="javascript:QRDisp()"><img src="/static/images/qrcode.png"></a>
+                　
+                <div class="search-input">
+                    <input type="text" id="flatpickrRange" placeholder="日付範囲を選択">
+                    <input type="text" id="startDate" hidden>
+                    <input type="text" id="endDate" hidden>
+                </div>
             </li>
             <!-- 再検索ボタン (予備空白調整用だった) -->
-            <li><a href="javascript:researchHMCD();"><i class="fas fa-search webbtn"></i></a></li>
+            <li>　<a href="javascript:researchHMCD();"><i class="fas fa-search webbtn"></i></a></li>
+            <!-- QRコード ポッポアップボタン -->
+            <li style="vertical-align: bottom;">
+                <a href="javascript:QRDisp()"><img src="/static/images/qrcode.png" width="36px"></a>
+            </li>
             <!-- 閉じるボタン -->
-            <li><a href="javascript:open('about:blank', '_self').close();"><i class="far fa-window-close webbtn"></i></a></li>
+            <!-- li><a href="javascript:open('about:blank', '_self').close();"><i class="far fa-window-close webbtn"></i></a></li -->
         </ul>
     </div>
     <hr>
@@ -81,21 +95,23 @@
         </ul>
     <% } else { %>
         <table id="tbl1">
-            <tr>
-                <th width="80px" rowspan="2">工程</th>
-                <th width="200px" rowspan="2">品　　番</th>
-                <th width="50px" rowspan="2">入庫数</th>
-                <th width="50px" rowspan="2">出庫数</th>
+            <tr class="sticky1">
+                <th width="80px" rowspan="2" class="th-small">工程</th>
+                <th width="200px" rowspan="2" class="th-small">品　　番</th>
+                <th width="50px" rowspan="2" class="th-small">入庫数</th>
+                <th width="50px" rowspan="2" class="th-small">出庫数</th>
                 <th colspan="4" class="th-small">洩れ不良件数</th>
                 <th width="36px" rowspan="2" class="th-small">形状<br>不良</th>
                 <th width="36px" rowspan="2" class="th-large-small">その他<br>不良</th>
                 <th width="50px" rowspan="2" class="th-small">廃棄数</th>
                 <th width="60px" rowspan="2" class="th-small">作業者</th>
-                <th width="40px" rowspan="2" class="th-small">CSV</th><th width="20px" rowspan="2" class="th-small"></th>
-                <th width="180px" rowspan="2" class="lef">&nbsp;備考</th>
-                <th width="80px" rowspan="2" class="">登録日付</th>
+                <th width="60px" rowspan="2" class="th-small">修正者</th>
+                <th width="60px" rowspan="2" class="th-small">確認者</th>
+                <th width="40px" rowspan="2" class="th-small">CSV</th>
+                <th width="180px" rowspan="2" class="th-small lef">&nbsp;備考</th>
+                <th width="80px" rowspan="2" class="th-small">登録日付</th>
             </tr>
-            <tr>
+            <tr class="sticky2">
                 <th width="36px" height="26px" class="th-large-small">黄銅部</th>
                 <th width="36px" height="26px" class="th-large-small">仮付部</th>
                 <th width="36px" height="26px" class="th-large-small">炉中部</th>
@@ -114,7 +130,31 @@
     <script>
         // 初期フォーカスをセット
         document.getElementById("input-hmcd").focus();
-
+        // 日付選択ダイアログ初期化
+        flatpickr("#flatpickrRange", {locale: "ja", mode: "range",
+            onReady: function(dateObj, dateStr, instance) {
+                const clearButton = document.createElement("div");
+                clearButton.innerHTML = "日付範囲をクリア";
+                clearButton.classList.add("clear-button");
+                clearButton.addEventListener("click", function() {
+                    instance.clear();
+                    // 日付条件クリア
+                    document.getElementById("startDate").value = "";
+                    document.getElementById("endDate").value = "";
+                });
+                instance.calendarContainer.appendChild(clearButton);
+            },
+            onChange: function(selectedDates) {
+                const startDate = selectedDates[0] ? selectedDates[0].toLocaleDateString() : "未選択";
+                const endDate = selectedDates[1] ? selectedDates[1].toLocaleDateString() : "未選択";
+                const selectedhmcd = document.getElementById("select-hmcd").value;
+                if (selectedhmcd != "-1" && startDate != "未選択" && endDate != "未選択") {
+                    document.getElementById("startDate").value = startDate;
+                    document.getElementById("endDate").value = endDate;
+                    changeHMCD(selectedhmcd);
+                }
+            }
+        });
         // IME全角入力の未確定状態かそれ以外かを判定
         let isComposing = false;
         window.addEventListener("compositionstart", e => {isComposing = true;});
@@ -144,6 +184,7 @@
 
             if (newArray.length == 0) {
                 const option = document.createElement("option");
+                option.value = "-1";
                 option.innerHTML = "品番を入力してください";
                 selectHMCD.appendChild(option);
                 selectHMCD.disabled = true;
@@ -157,7 +198,7 @@
                 changeHMCD(newArray[0].value);
             } else {
                 const option = document.createElement("option");
-                option.value = "";
+                option.value = "-1";
                 option.innerHTML = "品番を選択してください";
                 selectHMCD.appendChild(option);
                 for (let i = 0; i < newArray.length; i++) {
@@ -177,7 +218,13 @@
         }
         // selector の change イベント
         function changeHMCD(hmcd) {
-            fetch(`/es/search/${hmcd}`)
+            // 日付が選択されていたら条件を追加
+            let refine = "";
+            const startDate = document.getElementById("startDate").value.replaceAll("/", "-");
+            const endDate = document.getElementById("endDate").value.replaceAll("/", "-");
+            if (startDate && endDate) refine = "/" + startDate + "/" + endDate;
+            // 品番検索
+            fetch(`/es/search/${hmcd}${refine}`)
             .then(response => response.json())
             .then(data => {
                 // 今表示されているテーブルのヘッダー以外を全削除
@@ -188,7 +235,7 @@
                 // APIで取得したデータをテーブ行に追加
                 data.forEach(function (d) {
                     let newRow = table.insertRow();
-                    appendTD(newRow, getEntryRNM(d.ODCD), "");
+                    appendTD(newRow, getEntryRNM(d.ODCD), "td-small");
                     appendTD(newRow, d.HMCD, "s" + d.ENTRYSTS);
                     appendTD(newRow, d.CHKQTY, "td-big");
                     appendTD(newRow, d.DEPOQTY, "td-big");
@@ -205,14 +252,10 @@
                         appendTD(newRow, scrap, "alert");
                     }
                     appendTD(newRow, d.OPNAME, "td-large-small");
+                    appendTD(newRow, d.REPAIRNAME, "td-large-small");
+                    appendTD(newRow, d.VERIFIRENAME, "td-large-small");
                     appendTD(newRow, d.CSVOUTDT ? "済" : " ", "td-small");
-                    let check = document.createElement("input");
-                    check.setAttribute("type", "checkbox");
-                    check.setAttribute("name", "recsv");
-                    check.setAttribute("class", "checks");
-                    let newCell = newRow.insertCell();
-                    newCell.appendChild(check);
-                    appendTD(newRow, d.NOTE, "lef");
+                    appendTD(newRow, d.NOTE, "td-small lef");
                     appendTD(newRow, d.INSTDT, "td-small");
                 });
             });
@@ -232,39 +275,6 @@
                 changeHMCD(selecthmcd);
             } else {
                 alert("品番を選択してください.");
-            }
-        }
-        // CSVダウンロード処理
-        function csvdownload(){
-            const planday = document.getElementById("planday").value;
-            const odcd = document.querySelector('[name="select-odcd"]').value;
-            const date = new Date();                        //現在時刻を取得
-            const y = date.getFullYear(),                   //西暦年
-                m = ("0" + (date.getMonth() + 1)).slice(-2),//月　
-                d = ("0" + date.getDate()).slice(-2),       //日
-                H = ("0" + date.getHours()).slice(-2),      //時
-                M = ("0" + date.getMinutes()).slice(-2),    //分
-                S = ("0" + date.getSeconds()).slice(-2);    //秒
-            const time = `${H}${M}`;
-            /* alert(`${y}/${m}/${d} ${H}:${M}:${S}`); */
-            // (1) XMLHttpRequestオブジェクトを作成
-            const xmlHttpRequest = new XMLHttpRequest();
-            // (2) CSVデータ作成依頼
-            xmlHttpRequest.open('GET', `/es/makecsv/${planday}/${odcd}/${time}`, false); // 第3引数false:同期通信
-            xmlHttpRequest.send();
-            // (3) 同期処理終了後、ステータス判定
-            if (xmlHttpRequest.readyState == 4 && xmlHttpRequest.status == 200 ) {
-                // (4) CSVダウンロード済みにDOM更新 (1.img画像と2.リンク先)
-                const row = tbl1.rows.length;
-                for( var i = 2; i < row; i++ ){
-                    tbl1.rows[i].cells[13].innerHTML = "済";
-                }
-                const csvimg = document.getElementById("csvimg");
-                csvimg.src = "/static/images/csvnothing.png";
-                const csvref = document.getElementById("csvref");
-                csvref.href = "javascript:void(0)";
-                // (5) 完成したCSVファイルをダウンロード
-                location.href = `/static/downloads/es_${planday}_${odcd}_${time}.csv`;
             }
         }
         // QRポップアップ閉じる
