@@ -80,6 +80,7 @@
     <div id="popWin">
         <div class="pop-win">
             <div class="modal-body">
+                <div id="hmcd-title"></div>
                 <div id="qrcode"></div>
                 <svg id="barcode"></svg>
             </div>
@@ -289,6 +290,7 @@
             if (tbl1.rows.length <= 2) { return; }
             popWin.style.display = "flex";
             const hmcd = tbl1.rows[2].cells[1].innerText.trim();
+            document.getElementById("hmcd-title").innerText = hmcd;
             new QRCode(document.getElementById("qrcode"), {
             	text: hmcd,
 	            width: 128,

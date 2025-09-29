@@ -439,7 +439,6 @@ position: fixed;
 .pop-win {
     border-radius: 5px;
     width: 280px;
-    height: 200px;
     background-color: #fff;
 }
 .modal-body {
@@ -449,13 +448,20 @@ position: fixed;
 .modal-body img { 
     margin: 0 auto; 
 }
+#hmcd-title {
+    text-align: center;
+    font-weight: 900;
+    font-size: x-large;
+    margin-bottom: 10px;
+}
 #barcode { 
-    margin: 0 auto; 
+    margin-inline: auto;
+    margin-top: 10px;
 }#close {
-    color: #fff;
     cursor: pointer;
     text-align: center;
-    vertical-align: bottom;
+    background-color: antiquewhite;
+    border-radius: 5px;
 }
 /* =========================================================================== */
 /*  ワーニング
