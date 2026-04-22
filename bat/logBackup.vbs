@@ -17,15 +17,15 @@ mm = Right("0" & Month(dt), 2)
 dd = Right("0" & Day(dt), 2)
 
 ' デバッグログコピー
-source = "D:\Node.js\koken-portal\log\" & "debug.log." & yyyy & "-" & mm & "-" & dd
-dest   = "D:\Node.js\koken-portal\log\" & "debug_" & yyyy & "-" & mm & "-" & dd & ".log"
+source = "D:\Node.js\nodejs-10-leaktest-report\log\" & "debug.log." & yyyy & "-" & mm & "-" & dd
+dest   = "D:\Node.js\nodejs-10-leaktest-report\log\" & "debug_" & yyyy & "-" & mm & "-" & dd & ".log"
 If fs.FileExists( source ) Then
 	fs.CopyFile source, dest
 End If
 
 ' エラーログあればコピー
-source = "D:\Node.js\koken-portal\log\" & "error.log." & yyyy & "-" & mm & "-" & dd
-dest   = "D:\Node.js\koken-portal\log\" & "error_" & yyyy & "-" & mm & "-" & dd & ".log"
+source = "D:\Node.js\nodejs-10-leaktest-report\log\" & "error.log." & yyyy & "-" & mm & "-" & dd
+dest   = "D:\Node.js\nodejs-10-leaktest-report\log\" & "error_" & yyyy & "-" & mm & "-" & dd & ".log"
 If fs.FileExists( source ) Then
 	fs.CopyFile source, dest
 End If
