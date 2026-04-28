@@ -456,6 +456,14 @@ app.get("/es/search/:hmcd/:stdate/:eddate", async function (req, res, next) {
     }
 });
 
+// Send Mail Test
+app.get("/sendmail", async (req, res, next) => {
+    const MAIL_SUBJECT = "[自動通知] メール送信テスト";
+    const MAIL_BODY_HEADER = `各位\n\nメール送信テストとなります．\n\n error.log を確認してください\n\n`;
+    sendMail(MAIL_SUBJECT, MAIL_BODY_HEADER);
+    res.redirect("/es");
+});
+
 // 仕様書
 app.get("/specification", (req, res) => {
     res.render("specification.ejs")
